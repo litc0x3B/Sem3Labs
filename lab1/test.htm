@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="utf-8">
+  <title>Гистограмма</title>
+  <script src="https://www.google.com/jsapi"></script>
+  <script>
+   google.load("visualization", "1", {packages:["corechart"]});
+   google.setOnLoadCallback(drawChart);
+   function drawChart() {
+    var data = google.visualization.arrayToDataTable([
+     ['Число Элементов', 'Алгоритм1'],
+     [1, 1],
+     [2, 2],
+     [3, 3],
+     [4, 4],
+     [32116565131/2, 8],
+     [32116565131, 10],
+    ]);
+    var options = {
+     title: 'Время исполнения алгоритмов сортировки',
+     hAxis: {title: 'Число Элементов'},
+     vAxis: {title: 'Время'}
+    };
+    var chart = new google.visualization.LineChart(document.getElementById('chart'));
+    chart.draw(data, options);
+   }
+  </script>
+ </head>
+ <body>
+  <div id="chart" style="width: 1000px; height: 1000px;"></div>
+ </body>
+ </html>
