@@ -2,11 +2,21 @@
 
 #include <functional>
 #include <type_traits>
+#include <map>
+
 #include "sequence/sequence.hpp"
 #include "TestHelper.hpp"
+
  
 template<class T> using CompFunc = std::function<int(T,T)>;
 template<class T> using SortFunc = std::function<Sequence<T>*(Sequence<T>*, CompFunc<T>)>;
+
+template<class T> struct SortAlg 
+{
+    SortFunc<T> func;
+    std::string name;
+    bool isSelected = false;
+};
 
 template<class T> int DefaultComparer(T a, T b) 
 {
@@ -30,3 +40,8 @@ template<class T> Sequence<T> *BubbleSort(Sequence<T> *seq, CompFunc<T> cmp = De
 
     return seq;
 }
+
+std::map<std::string, SortAlg<int>> gAlgMap = 
+{
+    {"bs", {BubbleSort<int>, "Bubble Sort", false}}
+};

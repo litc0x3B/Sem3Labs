@@ -39,8 +39,9 @@ public:
     virtual void PopFront() = 0;
     virtual void Delete(int index) = 0;
     virtual void InsertAt(T item, int index) = 0;
-    virtual void Copy(const Sequence<T> *seq) = 0;
+    virtual void Clear() = 0;
 
+    virtual Sequence<T> *Copy(const Sequence<T> *seq) = 0;
     virtual Sequence<T> *Where(const std::function<bool(T)> &func) const = 0;
     virtual Sequence<T> *Concat(Sequence <T> *sequence) const = 0;
     virtual Sequence<T> *GetSubsequence(int startIndex, int endIndex) const = 0;

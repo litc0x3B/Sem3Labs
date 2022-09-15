@@ -5,6 +5,7 @@
 #include <stdexcept>
 
 #include "TestHelper.hpp"
+#include "sequence/linkedListSequence.hpp"
 
 template<typename T>
 class DynamicArraySequence : public Sequence<T>
@@ -32,12 +33,20 @@ public:
     void PopBack() override;
     void Delete(int index) override;
     void InsertAt(T item, int index) override;
-    void Copy(const Sequence<T> *seq) override;
+    void Clear() override;
 
+    Sequence<T> *Copy(const Sequence<T> *seq) override;
     Sequence<T> *Where(const std::function<bool(T)> &func) const override;
     Sequence<T> *Concat(Sequence <T> *array) const override;
     Sequence<T> *GetSubsequence(int startIndex, int endIndex) const override;
 };
+
+template<typename T>
+void DynamicArraySequence<T>::Clear()
+{
+    array->Resize(0);
+    this->elementsCount = 0;
+}
 
 template <typename T>
 DynamicArraySequence<T>::~DynamicArraySequence()
@@ -70,16 +79,18 @@ DynamicArraySequence<T>::DynamicArraySequence(const DynamicArraySequence <T>& ar
 }
 
 template<typename T>
-void Sequence<T>::Copy(const Sequence<T> *seq)
+Sequence<T> *DynamicArraySequence<T>::Copy(const Sequence<T> *seq)
 {
     delete this->array;
 
-    this->array = new DynamicArray<T>;
+    this->array = new DynamicArray<T>(0);
 
     for (int i = 0; i < this->GetSize(); i++)
     {
         this->Append(seq->operator[](i));
     }
+
+    return this;
 }
 
 template <typename T>

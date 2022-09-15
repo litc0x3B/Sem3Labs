@@ -27,12 +27,20 @@ public:
     void PopFront() override;
     void Delete(int index) override; 
     void InsertAt(T item, int index) override;
-    void Copy(const Sequence<T> *seq) override;
+    void Clear() override;
 
+    Sequence<T> *Copy(const Sequence<T> *seq) override;
     Sequence<T> *Where(const std::function<bool(T)> &func) const override;
     Sequence<T> *Concat(Sequence <T> *list) const override;
     Sequence<T> *GetSubsequence(int startIndex, int endIndex) const override;
 };
+
+template<typename T>
+void LinkedListSequence<T>::Clear()
+{
+    delete list;
+    list = new LinkedList<T>();
+}
 
 template<typename T>
 LinkedListSequence<T>::~LinkedListSequence()
@@ -128,7 +136,7 @@ void LinkedListSequence<T>::InsertAt(T item, int index)
 }
 
 template<typename T>
-void Sequence<T>::Copy(const Sequence<T> *seq)
+Sequence<T> *LinkedListSequence<T>::Copy(const Sequence<T> *seq)
 {
     delete this->list;
 
@@ -138,6 +146,8 @@ void Sequence<T>::Copy(const Sequence<T> *seq)
     {
         this->Append(seq->operator[](i));
     }
+
+    return this;
 }
 
 template<typename T>

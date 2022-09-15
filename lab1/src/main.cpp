@@ -6,16 +6,17 @@
 #include <unistd.h>
 #include <functional>
 #include <string>
+#include <chrono>
+#include <fstream>
 
 #include "sequence/dynamicArraySequence.hpp"
+#include "sequence/linkedListSequence.hpp"
+#include "sequence/sequence.hpp"
 #include "sort.hpp"
 
-
-template<class T> struct SortAlg 
+enum class SeqTypes
 {
-    SortFunc<T> func;
-    bool isSelected = false;
-    std::string name;
+    list, array, both
 };
 
 int GetNotNegativeNumArg(std::string errorMessage)
@@ -41,30 +42,68 @@ int GetNotNegativeNumArg(std::string errorMessage)
     return -1;
 }
 
-void TestAlg()
-{
 
+template<template <class> class SequenceType>
+int TestAlg(Sequence<int> *seq, SortAlg<int> alg)
+{
+    Sequence<int> *seqCopy = (new SequenceType<int>)->Copy(seq);
+
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::milliseconds;
+
+    auto t1 = high_resolution_clock::now();
+    alg.func(seqCopy, DefaultComparer<int>);
+    auto t2 = high_resolution_clock::now();
+
+    auto delta = duration_cast<milliseconds>(t2 - t1);
+
+    delete seqCopy;
+
+    return delta.count();
+}
+
+
+void TestAlgs(Sequence<int> *seq, SeqTypes seqTypes, std::ofstream &output)
+{
+    for (auto const &alg : gAlgMap)
+        {
+            if (alg.second.isSelected)
+            {
+                if (seqTypes == SeqTypes::array)
+                {
+                    int time = TestAlg<DynamicArraySequence>(seq, alg.second);
+                    output << time << "\t\t\t";
+                }
+                else if (seqTypes == SeqTypes::list)
+                {
+                    int time = TestAlg<LinkedListSequence>(seq, alg.second);
+                    output << time << "\t\t\t";
+                }
+                else if (seqTypes == SeqTypes::both)
+                {
+                    int timeArr = TestAlg<DynamicArraySequence>(seq, alg.second);
+                    int timeList = TestAlg<LinkedListSequence>(seq, alg.second);
+                    output << timeArr<< "\t\t\t" << timeList << "\t\t\t";
+                }
+            }
+        }
 }
 
 int main(int argc, char *argv[])
 {
-    std::map<std::string, SortAlg<int>> algMap = 
-    {
-        {"bs", {BubbleSort<int>, false, "Bubble Sort"}}
-    };
-
     bool outputFileSpecified = false;
     bool algSelected = false;
-    bool useLinkedLists = false;
-    bool useArrays = true;
     int opt;
 
-    std::string outputFile = "output.txt";
+    std::string outputFileName = "output.txt";
     char *inputAndOututFile = nullptr;
 
     int startCount = 1;
     int endCount = 100000000;
     int multiplier = 10;
+
+    SeqTypes seqTypes = SeqTypes::array;        
 
     //read args
     while((opt = getopt(argc, argv, "a:o:s:e:m:w:t:")) != -1)
@@ -74,7 +113,7 @@ int main(int argc, char *argv[])
             case 'a':
                 try
                 {
-                    algMap.at(optarg).isSelected = true;
+                    gAlgMap.at(optarg).isSelected = true;
                     algSelected = true;
                 }
                 catch (const std::out_of_range &e)
@@ -87,7 +126,7 @@ int main(int argc, char *argv[])
             case 'o':
                 if (!outputFileSpecified)
                 {
-                    outputFile = optarg;
+                    outputFileName = optarg;
                     outputFileSpecified = true;
                 }
                 else 
@@ -116,20 +155,17 @@ int main(int argc, char *argv[])
             case 't':
                 std::string arg = optarg;
 
-                if (arg == "both")
+                if (arg == "both")       
                 {
-                    useArrays = true;
-                    useLinkedLists = true;
+                    seqTypes = SeqTypes::both;
                 }
-                else if (arg == "linkedlist")
+                else if (arg == "linkedlist") 
                 {
-                    useArrays = false;
-                    useLinkedLists = true;
+                    seqTypes = SeqTypes::list;
                 }
-                else if (arg == "array")
-                {
-                    useArrays = true;
-                    useLinkedLists = false;
+                else if (arg == "array") 
+                {  
+                    seqTypes = SeqTypes::array;
                 }
                 else
                 {
@@ -149,23 +185,24 @@ int main(int argc, char *argv[])
     //algorithms tests
     std::srand(std::time(0));
 
-    using std::chrono::high_resolution_clock;
-    using std::chrono::duration_cast;
-    using std::chrono::milliseconds;
-
     //case 1: random generated sequence
     for (int elements = startCount; elements <= endCount; elements *= multiplier)
     {
-        if (useArrays)
+        auto *seq =  new DynamicArraySequence<int>();
+
+        for (int i = 0; i < elements; i++)
         {
-            DynamicArraySequence<int> arr;
-
-            for (int i = 0; i < elements; i++)
+            int rndNum = rand();
+            seq->Append(rndNum);
+            if (seq != nullptr)
             {
-                arr.Append(rand());
+                seq->Append(rndNum);
             }
-
         }
+
+        std::ofstream outputFileStream;
+        outputFileStream.open(outputFileName);
+        TestAlgs(seq, seqTypes, outputFileStream);
     }
 
 }
