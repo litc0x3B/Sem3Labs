@@ -17,6 +17,7 @@ add_executable(tests
         include/sort.hpp
         tests/sequence/linkedListSequenceTest.hpp
         tests/sequence/dynamicArraySequenceTest.hpp
+        tests/sequence/sequenceTest.hpp
         tests/sortTest.hpp
         tests/TestHelper.hpp)
 

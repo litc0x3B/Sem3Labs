@@ -2,6 +2,7 @@
 
 #include "sequence/linkedListSequenceTest.hpp"
 #include "sequence/dynamicArraySequenceTest.hpp"
+#include "sequence/sequenceTest.hpp"
 #include "sortTest.hpp"
 
 int main()

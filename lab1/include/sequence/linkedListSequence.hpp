@@ -142,7 +142,7 @@ Sequence<T> *LinkedListSequence<T>::Copy(const Sequence<T> *seq)
 
     this->list = new LinkedList<T>;
 
-    for (int i = 0; i < this->GetSize(); i++)
+    for (int i = 0; i < seq->GetSize(); i++)
     {
         this->Append(seq->operator[](i));
     }

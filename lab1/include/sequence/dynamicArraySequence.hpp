@@ -5,7 +5,6 @@
 #include <stdexcept>
 
 #include "TestHelper.hpp"
-#include "sequence/linkedListSequence.hpp"
 
 template<typename T>
 class DynamicArraySequence : public Sequence<T>
@@ -85,7 +84,7 @@ Sequence<T> *DynamicArraySequence<T>::Copy(const Sequence<T> *seq)
 
     this->array = new DynamicArray<T>(0);
 
-    for (int i = 0; i < this->GetSize(); i++)
+    for (int i = 0; i < seq->GetSize(); i++)
     {
         this->Append(seq->operator[](i));
     }
