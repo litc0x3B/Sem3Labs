@@ -301,28 +301,35 @@ int main(int argc, char *argv[])
     seqOutput.open(params.seqFileName);
   }
 
-  std::cout << "Выполняется..." << std::endl;
-
   const int maxElDiff = 100;
+  std::string caseName = "Случай 1: Случайная Последовательность";
+  std::cout << caseName << ". Выполняется..." << std::endl;
   std::ofstream timeOutput(params.timeFileName + "_case1.csv");
-  TestCase(params, timeOutput, seqOutput, "Случай 1: Случайная Последовательность", [](Sequence<int> *seq){
+  TestCase(params, timeOutput, seqOutput, "Случай 1: Случайная Последовательность.", [](Sequence<int> *seq){
     return rand();
   });
+  std::cout << "Готово!" << std::endl;
 
+  caseName = "Случай 2: Отсортированная Последовательность";
+  std::cout << caseName << ". Выполняется..." << std::endl;
   timeOutput.close();
   timeOutput.open(params.timeFileName + "_case2.csv");
-  TestCase(params, timeOutput, seqOutput, "Случай 2: Отсортированная Последовательность", [](Sequence<int> *seq)
+  TestCase(params, timeOutput, seqOutput, caseName, [](Sequence<int> *seq)
   {
     int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
     return lastEl + rand() % maxElDiff;
   });
+  std::cout << "Готово!" << std::endl;
 
+  caseName = "Случай 3: Последовательность, Отсортированная В Обратном Порядке";
+  std::cout << caseName << ". Выполняется..." << std::endl;
   timeOutput.close();
   timeOutput.open(params.timeFileName + "_case3.csv");
-  TestCase(params, timeOutput, seqOutput,"Случай 3: Отсортированная В Обратном Порядке",  [](Sequence<int> *seq){
+  TestCase(params, timeOutput, seqOutput,caseName, [](Sequence<int> *seq){
     int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
     return lastEl - rand() % maxElDiff;
   });
+  std::cout << "Готово!" << std::endl;
   
   timeOutput.close();
 
@@ -331,5 +338,4 @@ int main(int argc, char *argv[])
     seqOutput.close();
   }
 
-  std::cout << "Готово!" << std::endl;
 }
