@@ -27,16 +27,17 @@ struct Parametrs
   bool outputFileSpecified = false;
   bool algSelected = false;
 
-  std::string timeFileName = "output.txt";
+  std::string timeFileName = "output";
   char *seqFileName = nullptr;
 
   int startCount = 1;
-  int endCount = 10000;
+  int endCount = 5000;
   int multiplier = 1;
   int step = 100;
 
   SeqTypes seqTypes = SeqTypes::array;  
 };
+
 
 bool isListSelected(SeqTypes type)
 {
@@ -107,7 +108,7 @@ void TestAlgWithSeq(const Sequence<int> *seq, std::ofstream &timeOutput, std::of
   int elapsed;
   Sequence<int> *sortedSeq = TestAlg<SeqType>(seq, alg, elapsed);
 
-  timeOutput << std::setw(strWidth) << elapsed;
+  timeOutput << "," << elapsed;
   for (int i = 0; i < sortedSeq->GetSize() && seqOutput.is_open(); i++)
   {
     seqOutput << sortedSeq->operator[](i) << " ";
@@ -118,25 +119,27 @@ void TestAlgWithSeq(const Sequence<int> *seq, std::ofstream &timeOutput, std::of
 }
 
 
-void WriteSelectedAlgs(std::ofstream &timeOutput, Parametrs params)
+void WriteCaseHeader(Parametrs params, std::string caseName, std::ofstream &timeOutput, std::ofstream &seqOutput)
 {
-  timeOutput << std::setw(params.strWidth) << "Elements";
+  WriteWithCheck(seqOutput, "------------------------------");
+  WriteWithCheck(seqOutput, caseName);
+  timeOutput << "Elements";
 
   for (auto const &el : gAlgMap)
   { 
     if (el.second.isSelected) 
     {
-      if (isListSelected(params.seqTypes))
-        timeOutput << std::setw(params.strWidth) << el.second.name << "(list)";
       if (isArraySelected(params.seqTypes))
-        timeOutput << std::setw(params.strWidth) << el.second.name << "(arr)";
+        timeOutput << "," << el.second.name << "(arr)";
+      if (isListSelected(params.seqTypes))
+        timeOutput << "," << el.second.name << "(list)";
     }
   }
 
   timeOutput << std::endl;
 }
 
-void Test(const Sequence<int> *seq, Parametrs params, std::ofstream &timeOutput, std::ofstream &seqOutput)
+void TestSeq(Parametrs params, const Sequence<int> *seq, std::ofstream &timeOutput, std::ofstream &seqOutput)
 {
   WriteWithCheck(seqOutput, "Исходная последовательность:");
   for (int i = 0; i < seq->GetSize() && seqOutput.is_open(); i++)
@@ -145,7 +148,7 @@ void Test(const Sequence<int> *seq, Parametrs params, std::ofstream &timeOutput,
   }
   WriteWithCheck(seqOutput, "");
 
-  timeOutput << std::setw(params.strWidth) << seq->GetSize();
+  timeOutput << seq->GetSize();
 
   for (auto const &alg : gAlgMap)
   {
@@ -157,7 +160,7 @@ void Test(const Sequence<int> *seq, Parametrs params, std::ofstream &timeOutput,
         WriteWithCheck(seqOutput, "отсортированный DynamicArraySequence:");
         TestAlgWithSeq<DynamicArraySequence>(seq, timeOutput, seqOutput, alg.second, params.strWidth);
       }
-      else if (isListSelected(params.seqTypes)) 
+      if (isListSelected(params.seqTypes)) 
       {
         WriteWithCheck(seqOutput, "отсортированный LinkedListSequence:");
         TestAlgWithSeq<LinkedListSequence>(seq, timeOutput, seqOutput, alg.second, params.strWidth);
@@ -166,7 +169,6 @@ void Test(const Sequence<int> *seq, Parametrs params, std::ofstream &timeOutput,
   }
 
   WriteWithCheck(seqOutput, "************************************");
-  timeOutput << std::endl;
 }
 
 
@@ -238,6 +240,7 @@ Parametrs ReadArgs(int argc, char *argv[])
         {
           params.seqTypes = SeqTypes::both;
         }
+
         else if (arg == "list") 
         {
           params.seqTypes = SeqTypes::list;
@@ -263,15 +266,34 @@ Parametrs ReadArgs(int argc, char *argv[])
   return params;
 }
 
+void TestCase(Parametrs params, std::ofstream &timeOutput, std::ofstream &seqOutput, std::string caseName, 
+              const std::function<int(Sequence<int>*)> &getNextElFunc)
+{
+  WriteCaseHeader(params, caseName, timeOutput, seqOutput);
+
+  for (int elements = params.startCount; elements <= params.endCount; elements = (elements + params.step) * params.multiplier)
+  {
+    auto *seq = new DynamicArraySequence<int>();
+
+    for (int i = 0; i < elements; i++)
+    {
+      seq->Append(getNextElFunc(seq));
+    }
+
+    TestSeq(params, seq, timeOutput, seqOutput);
+    if ((elements + params.step) * params.multiplier <= params.endCount)
+    {
+      timeOutput << std::endl;
+    }
+    delete seq;
+  }
+}
+
 int main(int argc, char *argv[])
 {
   Parametrs params = ReadArgs(argc, argv);
   
-  
-  //algorithms tests
   std::srand(std::time(0));
-
-  std::ofstream timeOutput(params.timeFileName);
   std::ofstream seqOutput;
 
   if (params.seqFileName != nullptr)
@@ -279,26 +301,35 @@ int main(int argc, char *argv[])
     seqOutput.open(params.seqFileName);
   }
 
-  //case 1: random generated sequence
-  WriteSelectedAlgs(timeOutput, params);
-  for (int elements = params.startCount; elements <= params.endCount; elements = (elements + params.step) * params.multiplier)
+  std::cout << "Выполняется..." << std::endl;
+
+  const int maxElDiff = 100;
+  std::ofstream timeOutput(params.timeFileName + "_case1.csv");
+  TestCase(params, timeOutput, seqOutput, "Случай 1: Случайная Последовательность", [](Sequence<int> *seq){
+    return rand();
+  });
+
+  timeOutput.close();
+  timeOutput.open(params.timeFileName + "_case2.csv");
+  TestCase(params, timeOutput, seqOutput, "Случай 2: Отсортированная Последовательность", [](Sequence<int> *seq)
   {
-    auto *seq = new DynamicArraySequence<int>();
+    int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
+    return lastEl + rand() % maxElDiff;
+  });
 
-    for (int i = 0; i < elements; i++)
-    {
-      int rndNum = rand();
-      seq->Append(rndNum);
-    }
-
-    Test(seq, params, timeOutput, seqOutput);
-    delete seq;
-  }
-
+  timeOutput.close();
+  timeOutput.open(params.timeFileName + "_case3.csv");
+  TestCase(params, timeOutput, seqOutput,"Случай 3: Отсортированная В Обратном Порядке",  [](Sequence<int> *seq){
+    int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
+    return lastEl - rand() % maxElDiff;
+  });
+  
   timeOutput.close();
 
   if (seqOutput.is_open())
   {
     seqOutput.close();
   }
+
+  std::cout << "Готово!" << std::endl;
 }

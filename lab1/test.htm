@@ -4,30 +4,42 @@
   <meta charset="utf-8">
   <title>Гистограмма</title>
   <script src="https://www.google.com/jsapi"></script>
+  <script src="papaparse.min.js"></script>
   <script>
    google.load("visualization", "1", {packages:["corechart"]});
-   google.setOnLoadCallback(drawChart);
-   function drawChart() {
-    var data = google.visualization.arrayToDataTable([
-     ['Число Элементов', 'Алгоритм1'],
-     [1, 1],
-     [2, 2],
-     [3, 3],
-     [4, 4],
-     [32116565131/2, 8],
-     [32116565131, 10],
-    ]);
-    var options = {
-     title: 'Время исполнения алгоритмов сортировки',
-     hAxis: {title: 'Число Элементов'},
-     vAxis: {title: 'Время'}
-    };
-    var chart = new google.visualization.LineChart(document.getElementById('chart'));
-    chart.draw(data, options);
-   }
+   
   </script>
  </head>
  <body>
+    <input type="file" onchange="parseFile(this)">
+    <script>
+    function parseFile(input) {
+        Papa.parse(input.files[0], {complete: function(results) {
+		    drawChart(results.data);
+	    }});
+    }
+
+    function drawChart(arr) {
+        for (var i = 1; i < arr.length; i++)
+        {
+            for (var j = 1; j < arr[i].length; j++)
+            {
+                arr[i][j] = parseInt(arr[i][j]);
+            }
+        }
+
+        console.log(arr);
+        var data = google.visualization.arrayToDataTable(arr);
+        var options = {
+            title: 'Время исполнения алгоритмов сортировки',
+            hAxis: {title: 'Число Элементов'},
+            vAxis: {title: 'Время'}
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart'));
+        chart.draw(data, options);
+    }
+    </script>
   <div id="chart" style="width: 1000px; height: 1000px;"></div>
  </body>
  </html>
