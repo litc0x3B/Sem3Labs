@@ -302,11 +302,12 @@ int main(int argc, char *argv[])
   }
 
   const int maxElDiff = 100;
+  const int maxRand = 1000;
   std::string caseName = "Случай 1: Случайная Последовательность";
   std::cout << caseName << ". Выполняется..." << std::endl;
   std::ofstream timeOutput(params.timeFileName + "_case1.csv");
   TestCase(params, timeOutput, seqOutput, "Случай 1: Случайная Последовательность.", [](Sequence<int> *seq){
-    return rand();
+    return rand() % maxRand + 1;
   });
   std::cout << "Готово!" << std::endl;
 
@@ -317,7 +318,7 @@ int main(int argc, char *argv[])
   TestCase(params, timeOutput, seqOutput, caseName, [](Sequence<int> *seq)
   {
     int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
-    return lastEl + rand() % maxElDiff;
+    return lastEl + rand() % maxElDiff + 1;
   });
   std::cout << "Готово!" << std::endl;
 
@@ -327,7 +328,7 @@ int main(int argc, char *argv[])
   timeOutput.open(params.timeFileName + "_case3.csv");
   TestCase(params, timeOutput, seqOutput,caseName, [](Sequence<int> *seq){
     int lastEl = seq->GetSize() != 0 ? seq->GetLast() : 0;
-    return lastEl - rand() % maxElDiff;
+    return lastEl - rand() % maxElDiff + 1;
   });
   std::cout << "Готово!" << std::endl;
   

@@ -6,6 +6,7 @@
 
 #include "sequence/sequence.hpp"
 #include "TestHelper.hpp"
+#include "TestHelper.hpp"
 
  
 template<class T> using CompFunc = std::function<int(T,T)>;
@@ -43,16 +44,27 @@ template<class T> Sequence<T> *BubbleSort(Sequence<T> *seq, CompFunc<T> cmp = De
 
 template<class T> int _Partition(Sequence<T> *seq, CompFunc<T> cmp, int start, int end)
 {
-  int pivotInd = (end - start) / 2 + start;
+  T pivot = seq->At(start);
+  int count = 0;
+  for (int i = start + 1; i <= end; i++)
+  {
+    if (pivot > seq->At(i))
+    {
+      count++;
+    }
+  }
+
+  int pivotInd = start + count;
+  std::swap(seq->At(start), seq->At(pivotInd));
 
   int i = start;
   int j = end;
-  while (i <= pivotInd && pivotInd <= j)
+  while (i < pivotInd && pivotInd < j)
   {
-    while(cmp(seq->At(pivotInd), seq->At(i)) > 0 && pivotInd >= j) i++;
-    while(cmp(seq->At(pivotInd), seq->At(j)) < 0 && pivotInd <= j) j--;
+    while(cmp(pivot, seq->At(i)) > 0 && pivotInd >= i) i++;
+    while(cmp(pivot, seq->At(j)) <= 0 && pivotInd <= j) j--;
 
-    if (i != j)
+    if (i < pivotInd && pivotInd < j)
     {
       std::swap(seq->At(i++), seq->At(j--));
     }
@@ -67,6 +79,7 @@ template<class T> void _QuickSort(Sequence<T> *seq, CompFunc<T> cmp, int start, 
       return;
 
     int pivotInd = _Partition(seq, cmp, start, end);
+
     _QuickSort(seq, cmp, start, pivotInd - 1);
     _QuickSort(seq, cmp, pivotInd + 1, end);
 }

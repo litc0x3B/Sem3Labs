@@ -52,5 +52,5 @@ void containersEqual(T1 &container1, T2 &container2, int size)
 template<typename T>
 void showContainer(T &container, int size)
 {
-    std::cout << containerToStream(container, size).rdbuf() << std::endl;
+    std::cerr << containerToStream(container, size).rdbuf() << std::endl;
 }
