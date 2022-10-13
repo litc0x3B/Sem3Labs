@@ -3,22 +3,12 @@
 #include <functional>
 #include <stdexcept>
 
-enum SequenceType
-    {
-        undefined,
-        list,
-        array,
-    };
-
 template<typename T>
 class Sequence
 {
-protected:
-    SequenceType sequenceType = undefined;
 public:
     virtual ~Sequence() {};
 
-    SequenceType GetType();
     virtual void Map(const std::function<void(T&)> &func);
     virtual void Map(const std::function<void(T&)> &func, int startIndex, int endIndex);
     virtual int Find(Sequence<T> *sequence, int startIndex = 0) const;
@@ -30,6 +20,7 @@ public:
     virtual T &GetLast() = 0;
     virtual int GetActualSize() const = 0;
     virtual int GetSize() const = 0;
+    virtual T &At(int index);
 
     virtual T &operator[](int index) const = 0;
 
@@ -47,11 +38,10 @@ public:
     virtual Sequence<T> *GetSubsequence(int startIndex, int endIndex) const = 0;
 };
 
-
-template <typename T>
-SequenceType Sequence<T>::GetType()
+template<typename T>
+T &Sequence<T>::At(int index)
 {
-    return this->sequenceType;
+    return this->operator[](index);
 }
 
 template <typename T>

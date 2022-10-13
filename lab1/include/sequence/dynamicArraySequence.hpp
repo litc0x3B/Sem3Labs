@@ -10,7 +10,7 @@ template<typename T>
 class DynamicArraySequence : public Sequence<T>
 {
 private:
-    DynamicArray<T> *array = nullptr;
+    DynamicArray<T> *storage = nullptr;
     int elementsCount = 0;
 
 public:
@@ -43,46 +43,43 @@ public:
 template<typename T>
 void DynamicArraySequence<T>::Clear()
 {
-    array->Resize(0);
+    storage->Resize(0);
     this->elementsCount = 0;
 }
 
 template <typename T>
 DynamicArraySequence<T>::~DynamicArraySequence()
 {
-    delete array;
+    delete storage;
 }
 
 template <typename T>
 DynamicArraySequence<T>::DynamicArraySequence()
 {
-    this->sequenceType = SequenceType::array;
-    this->array = new DynamicArray<T>(0);
+    this->storage = new DynamicArray<T>(0);
     elementsCount = 0;
 }
 
 template <typename T>
 DynamicArraySequence<T>::DynamicArraySequence(const T* items, int count)
 {
-    this->sequenceType = SequenceType::array;
-    this->array = new DynamicArray<T>(items, count);
+    this->storage = new DynamicArray<T>(items, count);
     elementsCount = count;
 }
 
 template <typename T>
 DynamicArraySequence<T>::DynamicArraySequence(const DynamicArraySequence <T>& array)
 {
-    this->sequenceType = SequenceType::array;
-    this->array = new DynamicArray<T>(*array.array);
+    this->storage = new DynamicArray<T>(*array.storage);
     this->elementsCount = array.elementsCount;
 }
 
 template<typename T>
 Sequence<T> *DynamicArraySequence<T>::Copy(const Sequence<T> *seq)
 {
-    delete this->array;
+    delete this->storage;
 
-    this->array = new DynamicArray<T>(0);
+    this->storage = new DynamicArray<T>(0);
 
     for (int i = 0; i < seq->GetSize(); i++)
     {
@@ -113,7 +110,7 @@ int DynamicArraySequence<T>::GetSize() const
 template<typename T>
 int DynamicArraySequence<T>::GetActualSize() const
 {
-    return this->array->GetSize();
+    return this->storage->GetSize();
 }
 
 template <typename T>
@@ -121,14 +118,14 @@ void DynamicArraySequence<T>::Append(T item)
 {
     if (this->elementsCount == 0)
     {
-        this->array->Resize(1);
+        this->storage->Resize(1);
     }
-    else if (this->elementsCount >= this->array->GetSize())
+    else if (this->elementsCount >= this->storage->GetSize())
     {
-        this->array->Resize(this->array->GetSize() * 2);
+        this->storage->Resize(this->storage->GetSize() * 2);
     }
 
-    (*this->array)[elementsCount] = item;
+    (*this->storage)[elementsCount] = item;
     elementsCount++;
 }
 
@@ -157,27 +154,27 @@ void DynamicArraySequence<T>::Delete(int index)
         throw std::out_of_range("index is out of range");
     }
 
-    if (this->elementsCount - 1 <= this->array->GetSize() / 2)
+    if (this->elementsCount - 1 <= this->storage->GetSize() / 2)
     {
-        DynamicArray<T> *newArr = new DynamicArray<T>(this->array->GetSize() / 2);
+        DynamicArray<T> *newArr = new DynamicArray<T>(this->storage->GetSize() / 2);
         for (int i = 0; i < index; i++)
         {
-            newArr->operator[](i) = (*this->array)[i];
+            newArr->operator[](i) = (*this->storage)[i];
         }
 
         for (int i = index; i < this->elementsCount - 1; i++)
         {
-            newArr->operator[](i) = (*this->array)[i + 1];
+            newArr->operator[](i) = (*this->storage)[i + 1];
         }
 
-        delete this->array;
-        this->array = newArr;
+        delete this->storage;
+        this->storage = newArr;
     }
     else
     {
         for (int i = index; i < elementsCount - 1; i++)
         {
-            this->array->operator[](i) = this->array->operator[](i + 1) ;
+            this->storage->operator[](i) = this->storage->operator[](i + 1) ;
         }
     }
 
@@ -192,9 +189,9 @@ void DynamicArraySequence<T>::PopBack()
         throw std::runtime_error("PopBack called in DynamicArraySequence with zero elements");
     }
 
-    if (this->elementsCount - 1 <= this->array->GetSize() / 2)
+    if (this->elementsCount - 1 <= this->storage->GetSize() / 2)
     {
-        this->array->Resize(this->array->GetSize() / 2);
+        this->storage->Resize(this->storage->GetSize() / 2);
     }
 
     elementsCount--;
@@ -214,12 +211,12 @@ void DynamicArraySequence<T>::InsertAt(T item, int index)
         return;
     }
 
-    if (this->elementsCount >= this->array->GetSize())
+    if (this->elementsCount >= this->storage->GetSize())
     {
         DynamicArray<T> *newArr;
         if (this->elementsCount != 0)
         {
-            newArr = new DynamicArray<T>(this->array->GetSize() * 2);
+            newArr = new DynamicArray<T>(this->storage->GetSize() * 2);
         }
         else
         {
@@ -229,27 +226,27 @@ void DynamicArraySequence<T>::InsertAt(T item, int index)
         int i = 0;
         for (; i < index; i++)
         {
-            newArr->operator[](i) = (*this->array)[i];
+            newArr->operator[](i) = (*this->storage)[i];
         }
 
         newArr->operator[](i++) = item;
 
         for (; i < this->elementsCount + 1; i++)
         {
-            newArr->operator[](i) = (*this->array)[i - 1];
+            newArr->operator[](i) = (*this->storage)[i - 1];
         }
 
-        delete this->array;
-        this->array = newArr;
+        delete this->storage;
+        this->storage = newArr;
     }
     else
     {
         for (int i = this->elementsCount + 1; i > index; i--)
         {
-            this->array->operator[](i) = this->array->operator[](i - 1);
+            this->storage->operator[](i) = this->storage->operator[](i - 1);
         }
 
-        this->array->operator[](index) = item;
+        this->storage->operator[](index) = item;
     }
 
     elementsCount++;
@@ -263,34 +260,27 @@ T &DynamicArraySequence<T>::operator[](int index) const
         throw std::out_of_range("index is out of range");
     }
 
-    return (*this->array)[index];
+    return (*this->storage)[index];
 }
 
 template <typename T>
 Sequence<T> *DynamicArraySequence<T>::Concat(Sequence <T> *array) const
 {
-
-    if (array->GetType() != SequenceType::array)
-    {
-        throw std::runtime_error("Argument isn't a DynamicArraySequence");
-    }
-
-    DynamicArraySequence<T> *typecastedArray = (DynamicArraySequence<T> *)array;
     DynamicArraySequence<T> *ret = new DynamicArraySequence<T>();
 
-    ret->array->Resize(this->elementsCount + typecastedArray->elementsCount);
+    ret->storage->Resize(this->GetSize() + array->GetSize());
 
     for (int i = 0; i < this->elementsCount; i++)
     {
-        (*ret->array)[i] = (*this->array)[i];
+        (*ret->storage)[i] = (*this->storage)[i];
     }
 
-    for (int i = 0; i < typecastedArray->elementsCount; i++)
+    for (int i = 0; i < array->GetSize(); i++)
     {
-        (*ret->array)[i + this->elementsCount] = (*typecastedArray->array)[i];
+        (*ret->storage)[i + this->elementsCount] = (*array)[i];
     }
 
-    ret->elementsCount = this->elementsCount + typecastedArray->elementsCount;
+    ret->elementsCount = this->elementsCount + array->GetSize();
 
     return ret;
 }
@@ -304,11 +294,11 @@ Sequence<T> *DynamicArraySequence<T>::GetSubsequence(int startIndex, int endInde
     }
 
     DynamicArraySequence<T> *ret = new DynamicArraySequence<T>();
-    ret->array->Resize(endIndex - startIndex + 1);
+    ret->storage->Resize(endIndex - startIndex + 1);
 
     for (int i = startIndex, j = 0; i <= endIndex; i++, j++)
     {
-        (*ret->array)[j] = (*this->array)[i];
+        (*ret->storage)[j] = (*this->storage)[i];
     }
 
     ret->elementsCount = endIndex - startIndex + 1;
@@ -328,7 +318,7 @@ Sequence<T> *DynamicArraySequence<T>::Where(const std::function<bool(T)> &func) 
     }
 
     DynamicArraySequence *newArr = new DynamicArraySequence<T>();
-    newArr->array->Resize(counter);
+    newArr->storage->Resize(counter);
 
     for (int i = 0; i < this->GetSize(); i++)
     {

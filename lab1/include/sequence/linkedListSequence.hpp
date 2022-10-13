@@ -52,21 +52,18 @@ template<typename T>
 LinkedListSequence<T>::LinkedListSequence (const T* items, int count)
 {
     list = new LinkedList<T>(items, count); 
-    Sequence<T>::sequenceType = SequenceType::list; 
 }
 
 template<typename T>
 LinkedListSequence<T>::LinkedListSequence ()
 {
     list = new LinkedList<T>();
-    Sequence<T>::sequenceType = SequenceType::list; 
 }
 
 template<typename T>
 LinkedListSequence<T>::LinkedListSequence (const LinkedListSequence <T> &list)
 {
     this->list = new LinkedList<T>(*list.list);
-    Sequence<T>::sequenceType = SequenceType::list; 
 }
 
 template<typename T>
@@ -153,14 +150,12 @@ Sequence<T> *LinkedListSequence<T>::Copy(const Sequence<T> *seq)
 template<typename T>
 Sequence<T> *LinkedListSequence<T>::Concat(Sequence<T> *sequence) const
 {
-    if (sequence->GetType() != SequenceType::list)
-    {
-        throw std::runtime_error("Sequence is not LinkedListSequence");
-    }
-    LinkedListSequence<T> *list = (LinkedListSequence<T> *)sequence;
-
     LinkedListSequence<T> *newList = new LinkedListSequence<T>(*this);
-    (*newList->list) += (*list->list);
+
+    for (int i = 0; i < sequence->GetSize(); i++)
+    {
+        newList->Append(sequence->At(i));
+    }
 
     return newList;
 }

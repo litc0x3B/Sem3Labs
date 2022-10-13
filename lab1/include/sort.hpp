@@ -41,13 +41,51 @@ template<class T> Sequence<T> *BubbleSort(Sequence<T> *seq, CompFunc<T> cmp = De
   return seq;
 }
 
+template<class T> int _Partition(Sequence<T> *seq, CompFunc<T> cmp, int start, int end)
+{
+  int pivotInd = (end - start) / 2 + start;
+
+  int i = start;
+  int j = end;
+  while (i <= pivotInd && pivotInd <= j)
+  {
+    while(cmp(seq->At(pivotInd), seq->At(i)) > 0 && pivotInd >= j) i++;
+    while(cmp(seq->At(pivotInd), seq->At(j)) < 0 && pivotInd <= j) j--;
+
+    if (i != j)
+    {
+      std::swap(seq->At(i++), seq->At(j--));
+    }
+  }
+
+  return pivotInd;
+}
+
+template<class T> void _QuickSort(Sequence<T> *seq, CompFunc<T> cmp, int start, int end)
+{
+    if (start >= end)   
+      return;
+
+    int pivotInd = _Partition(seq, cmp, start, end);
+    _QuickSort(seq, cmp, start, pivotInd - 1);
+    _QuickSort(seq, cmp, pivotInd + 1, end);
+}
+
+template<class T> Sequence<T> *QuickSort(Sequence<T> *seq, CompFunc<T> cmp = DefaultComparer) 
+{
+  _QuickSort(seq, cmp, 0, seq->GetSize() - 1);
+  return seq;
+}
+
 template<class T> Sequence<T> *DoNothing(Sequence<T> *seq, CompFunc<T> cmp = DefaultComparer)
 {
   return seq;
 } 
 
+
 std::map<std::string, SortAlg<int>> gAlgMap = 
 {
-  {"bs", {BubbleSort<int>, "Bubble", false}},
-  {"n", {DoNothing<int>, "DoNothing", false}}
+  {"n", {DoNothing<int>, "DoNothing", false}},
+  {"bs", {BubbleSort<int>, "BubbleSort", false}},
+  {"qs", {QuickSort<int>, "QuickSort", false}}
 };

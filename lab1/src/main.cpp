@@ -178,7 +178,7 @@ Parametrs ReadArgs(int argc, char *argv[])
   Parametrs params;
   bool algSelected = false;
 
-  while((opt = getopt(argc, argv, "a:o:s:e:m:w:t:p:i:")) != -1)
+  while((opt = getopt(argc, argv, "a:o:s:e:m:w:t:p:")) != -1)
   {
     switch (opt) 
     {

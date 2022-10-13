@@ -21,6 +21,12 @@ void SortTestFunc(SortFunc<int> func)
 
 TEST(sortTest, BubbleSort)
 {
-    SortTestFunc<LinkedListSequence>(BubbleSort<int>);
     SortTestFunc<DynamicArraySequence>(BubbleSort<int>);
+    SortTestFunc<LinkedListSequence>(BubbleSort<int>);
+}
+
+TEST(sortTest, QuickSort)
+{
+    SortTestFunc<DynamicArraySequence>(QuickSort<int>);
+    SortTestFunc<LinkedListSequence>(QuickSort<int>);
 }
