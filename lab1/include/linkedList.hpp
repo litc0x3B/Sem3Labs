@@ -27,7 +27,7 @@ private:
     int size = 0;
 
     void InitFirstNode(T item);
-    Node<T> *GetNode(int index) const;
+    
 
 public:
     LinkedList();
@@ -37,12 +37,14 @@ public:
     ~LinkedList();
 
     int GetSize() const;
+    Node<T> *GetNode(int index) const;
 
     void Append(T item);
     void Prepend(T item);
     void PopBack();
     void PopFront();
     void Delete(int index);
+    void Delete(Node<T> *node);
 
     T &operator[](int index) const;
     LinkedList<T> &operator=(const LinkedList<T> &list);
@@ -242,6 +244,16 @@ void LinkedList<T>::Delete(int index)
     }
 
     Node<T> *node = GetNode(index);
+    node->next->prev = node->prev;
+    node->prev->next = node->next;
+    size--;
+
+    delete node;
+}
+
+template <typename T>
+void LinkedList<T>::Delete(Node<T> *node)
+{
     node->next->prev = node->prev;
     node->prev->next = node->next;
     size--;

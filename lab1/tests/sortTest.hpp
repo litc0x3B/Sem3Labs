@@ -30,3 +30,20 @@ TEST(sortTest, QuickSort)
     SortTestFunc<DynamicArraySequence>(QuickSort<int>);
     SortTestFunc<LinkedListSequence>(QuickSort<int>);
 }
+
+TEST(sortTest, ShellSortDistaces)
+{
+    LinkedListSequence<int> *list = _GenerateDistances(9);
+    int expect[] = {1, 2, 3, 4, 6, 8, 9};
+
+    showContainer(*list, list->GetSize());
+
+    ASSERT_EQ(list->GetSize(), ARRAY_SIZE(expect, int));
+    containersEqual(*list, expect, ARRAY_SIZE(expect, int));
+}
+
+TEST(sortTest, ShellSort)
+{
+    SortTestFunc<DynamicArraySequence>(ShellSort<int>);
+    SortTestFunc<LinkedListSequence>(ShellSort<int>);
+}

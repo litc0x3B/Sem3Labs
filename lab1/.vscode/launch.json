@@ -8,9 +8,7 @@
             "program": "${command:cmake.launchTargetPath}",
             "args": [
                 "-a",
-                "qs",
-                "-a",
-                "bs",
+                "ss",
                 "-w",
                 "output.txt",
                 "-e",

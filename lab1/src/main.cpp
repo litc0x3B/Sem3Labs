@@ -302,8 +302,8 @@ int main(int argc, char *argv[])
   }
 
   const int maxElDiff = 100;
-  const int maxRand = 1000;
-  std::string caseName = "Случай 1: Случайная Последовательность";
+  const int maxRand = 1000000;
+  std::string caseName = "Случай 1: Случайная последовательность";
   std::cout << caseName << ". Выполняется..." << std::endl;
   std::ofstream timeOutput(params.timeFileName + "_case1.csv");
   TestCase(params, timeOutput, seqOutput, "Случай 1: Случайная Последовательность.", [](Sequence<int> *seq){
@@ -311,7 +311,7 @@ int main(int argc, char *argv[])
   });
   std::cout << "Готово!" << std::endl;
 
-  caseName = "Случай 2: Отсортированная Последовательность";
+  caseName = "Случай 2: Отсортированная последовательность";
   std::cout << caseName << ". Выполняется..." << std::endl;
   timeOutput.close();
   timeOutput.open(params.timeFileName + "_case2.csv");
@@ -322,7 +322,7 @@ int main(int argc, char *argv[])
   });
   std::cout << "Готово!" << std::endl;
 
-  caseName = "Случай 3: Последовательность, Отсортированная В Обратном Порядке";
+  caseName = "Случай 3: Последовательность, отсортированная в обратном порядке";
   std::cout << caseName << ". Выполняется..." << std::endl;
   timeOutput.close();
   timeOutput.open(params.timeFileName + "_case3.csv");

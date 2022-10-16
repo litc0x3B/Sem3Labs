@@ -2,6 +2,5 @@
 *.out
 build
 cmake-build-debug
-.vscode
 .idea
 .cache

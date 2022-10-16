@@ -40,6 +40,7 @@ public:
     Sequence<T> *GetSubsequence(int startIndex, int endIndex) const override;
 };
 
+
 template<typename T>
 void DynamicArraySequence<T>::Clear()
 {

@@ -6,7 +6,7 @@ template<typename T>
 class LinkedListSequence : public Sequence<T>
 {
 private:
-    LinkedList<T> *list;
+    LinkedList<T> *storage;
 
 public:
     LinkedListSequence(const T* items, int count);
@@ -21,6 +21,7 @@ public:
 
     T &operator[](int index) const override;
 
+    LinkedList<T> *GetStorage();
     void Append(T item) override;
     void Prepend(T item) override;
     void PopBack() override;
@@ -36,108 +37,114 @@ public:
 };
 
 template<typename T>
+LinkedList<T> *LinkedListSequence<T>::GetStorage()
+{
+    return storage;
+}
+
+template<typename T>
 void LinkedListSequence<T>::Clear()
 {
-    delete list;
-    list = new LinkedList<T>();
+    delete storage;
+    storage = new LinkedList<T>();
 }
 
 template<typename T>
 LinkedListSequence<T>::~LinkedListSequence()
 {
-    delete list;
+    delete storage;
 }
 
 template<typename T>
 LinkedListSequence<T>::LinkedListSequence (const T* items, int count)
 {
-    list = new LinkedList<T>(items, count); 
+    storage = new LinkedList<T>(items, count); 
 }
 
 template<typename T>
 LinkedListSequence<T>::LinkedListSequence ()
 {
-    list = new LinkedList<T>();
+    storage = new LinkedList<T>();
 }
 
 template<typename T>
 LinkedListSequence<T>::LinkedListSequence (const LinkedListSequence <T> &list)
 {
-    this->list = new LinkedList<T>(*list.list);
+    this->storage = new LinkedList<T>(*list.storage);
 }
 
 template<typename T>
 T &LinkedListSequence<T>::GetFirst()
 {
-    return (*list)[0];
+    return (*storage)[0];
 }
 
 template<typename  T>
 T &LinkedListSequence<T>::GetLast()
 {
-    return (*list)[list->GetSize() - 1];
+    return (*storage)[storage->GetSize() - 1];
 }
 
 template<typename T>
 T &LinkedListSequence<T>::operator[](int index) const
 {
-    return (*list)[index];
+    return (*storage)[index];
 }
 
 template<typename T>
 int LinkedListSequence<T>::GetSize() const
 {
-    return list->GetSize();
+    return storage->GetSize();
 }
 
 template<typename T>
 int LinkedListSequence<T>::GetActualSize() const
 {
-    return list->GetSize();
+    return storage->GetSize();
 }
 
 template<typename T>
 void LinkedListSequence<T>::Append(T item)
 {
-    list->Append(item);
+    storage->Append(item);
 }
 
 template<typename T>
 void LinkedListSequence<T>::Prepend(T item)
 {
-    list->Prepend(item);
+    storage->Prepend(item);
 }
 
 template<typename T>
 void LinkedListSequence<T>::PopBack()
 {
-    list->PopBack();
+    storage->PopBack();
 }
 
 template<typename T>
 void LinkedListSequence<T>::PopFront()
 {
-    list->PopFront();
+    storage->PopFront();
 }
 
 template<typename T>
 void LinkedListSequence<T>::Delete(int index)
 {
-    list->Delete(index);
+    storage->Delete(index);
 }
 
 template<typename T>
 void LinkedListSequence<T>::InsertAt(T item, int index)
 {
-    list->InsertAt(item, index);
+    storage->InsertAt(item, index);
 }
 
 template<typename T>
 Sequence<T> *LinkedListSequence<T>::Copy(const Sequence<T> *seq)
 {
-    delete this->list;
+    delete this->storage;
 
-    this->list = new LinkedList<T>;
+    this->storage = new LinkedList<T>;
 
     for (int i = 0; i < seq->GetSize(); i++)
     {
@@ -164,8 +171,8 @@ template<typename T>
 Sequence<T> *LinkedListSequence<T>::GetSubsequence(int startIndex, int endIndex) const
 {
     LinkedListSequence<T> *newList = new LinkedListSequence<T>;
-    delete newList->list;
-    newList->list = new LinkedList<T>(*this->list, startIndex, endIndex);
+    delete newList->storage;
+    newList->storage = new LinkedList<T>(*this->storage, startIndex, endIndex);
     return (Sequence<T>*)newList;
 }
 
