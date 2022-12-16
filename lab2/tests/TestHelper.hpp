@@ -2,10 +2,10 @@
 
 #include <gtest/gtest.h>
 
-#define ARRAY_SIZE(array, type) sizeof(array) / sizeof(type)
+#define ARRAY_SIZE(array) sizeof(array) / sizeof(array[0])
 
 const int TEST_ARR[] = {0, 1, 2, 3, 4, 5, 6, 7};
-const int TEST_ARR_SIZE = ARRAY_SIZE(TEST_ARR, int);
+const int TEST_ARR_SIZE = ARRAY_SIZE(TEST_ARR);
 
 template <typename T>
 std::stringstream containerToStream(T &container, int size)

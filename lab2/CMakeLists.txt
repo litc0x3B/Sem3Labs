@@ -10,8 +10,15 @@ include_directories(include tests ${GTEST_INCLUDE_DIRS})
 
 add_executable(tests
         src/tests.cpp
-        tests/treeTests.hpp
+        include/iDictionary.hpp
+        include/indexing.hpp
+        tests/test_indexing.hpp
+        tests/test_nullable.hpp
+        tests/test_binTree.hpp
+        tests/test_tree.hpp
+        tests/test_set.hpp
         tests/TestHelper.hpp
+        include/nullable.hpp
         include/virtualFS.hpp
         include/tree.hpp
         include/dynamicArray.hpp
