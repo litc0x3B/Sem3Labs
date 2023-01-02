@@ -6,8 +6,12 @@
 
 #include "binTree.hpp"
 #include "iDictionary.hpp"
+#include "icollection.hpp"
 #include "sequence/dynamicArraySequence.hpp"
 #include "set.hpp"
+
+template <class TKey>
+class BinTreeDictEntry;
 
 template <class TKey>
 using CompKeysFunc = std::function<int(const TKey &, const TKey &)>;
@@ -28,24 +32,22 @@ class AttributeInfo
     this->name = name;
   }
 
-  // created only for new[] better not use in other situations
+  // for new[] only better not use in other situations
   AttributeInfo() {}
 
-  int CompareKeys(const TKey &key1, const TKey &key2)
-  {
-    return compKeys(key1, key2);
-  }
-  std::string GetName() { return name; }
+  int CompareKeys(const TKey &key1, const TKey &key2) const { return compKeys(key1, key2); }
+  std::string GetName() const { return name; }
 
-  bool operator== (const AttributeInfo &attrInfo) {return this->name == attrInfo.name;}
-  bool operator!= (const AttributeInfo &attrInfo) {return !(attrInfo == *this);}
+  bool operator==(const AttributeInfo &attrInfo) const { return this->name == attrInfo.name; }
+  bool operator!=(const AttributeInfo &attrInfo) const { return !(attrInfo == *this); }
 };
 
 template <class TKey>
 class BinTreeDictEntry
 {
  public:
-  virtual TKey GetKey() = 0;
+  virtual TKey GetKey() const = 0;
+  virtual ~BinTreeDictEntry(){};
 };
 
 template <class TKey, class TValue>
@@ -56,15 +58,14 @@ class BinTreeDictEntryOnlyValue : public BinTreeDictEntry<TKey>
   TValue value;
 
  public:
-  BinTreeDictEntryOnlyValue(const GetKeyFunc<TKey, TValue> &getKey,
-                            TValue value)
+  BinTreeDictEntryOnlyValue(const GetKeyFunc<TKey, TValue> &getKey, TValue value)
   {
     this->getKey = getKey;
     this->value = value;
   }
 
-  TKey GetKey() override { return getKey(value); }
-  TValue GetValue() { return value; }
+  TKey GetKey() const override { return getKey(value); }
+  TValue GetValue() const { return value; }
 };
 
 template <class TKey>
@@ -75,7 +76,7 @@ class BinTreeDictEntryOnlyKey : public BinTreeDictEntry<TKey>
 
  public:
   BinTreeDictEntryOnlyKey(TKey key) { this->key = key; }
-  TKey GetKey() override { return key; }
+  TKey GetKey() const override { return key; }
 };
 
 template <class TKey, class TValue>
@@ -88,8 +89,7 @@ class AttributesInfo
  public:
   AttributesInfo(const AttributesInfo &attrs)
   {
-    this->attributes =
-        new DynamicArraySequence<AttributeInfo<TKey>>(*attrs.attributes);
+    this->attributes = new DynamicArraySequence<AttributeInfo<TKey>>(*attrs.attributes);
     this->getKey = attrs.getKey;
   }
 
@@ -111,11 +111,10 @@ class AttributesInfo
     this->getKey = getKey;
   }
 
-  int Compare(const BinTreeDictEntry<TKey> *entry1,
-              const BinTreeDictEntry<TKey> *entry2)
+  int Compare(const BinTreeDictEntry<TKey> *entry1, const BinTreeDictEntry<TKey> *entry2) const
   {
-    TValue key1 = entry1->GetKey();
-    TValue key2 = entry2->GetKey();
+    TKey key1 = entry1->GetKey();
+    TKey key2 = entry2->GetKey();
 
     for (int i = 0; i < attributes->GetSize(); i++)
     {
@@ -131,6 +130,8 @@ class AttributesInfo
     return 0;
   }
 
+  TKey GetKey(const TValue &value) const { return getKey(value); }
+
   ~AttributesInfo() { delete attributes; }
 };
 
@@ -139,46 +140,107 @@ class IndexedDict : public IDictionary<TKey, TValue>
 {
  private:
   AttributesInfo<TKey, TValue> attributes;
-  BinTree<std::unique_ptr<BinTreeDictEntry<TKey>>> *binTree;
-
-  std::unique_ptr<BinTreeDictEntry<TKey>> _ToKeyTreeEntry(TKey key)
-  {
-    return std::move(std::unique_ptr<BinTreeDictEntry<TKey>>(
-        new BinTreeDictEntryOnlyKey<TKey>(key)));
-  }
+  std::shared_ptr<BinTree<BinTreeDictEntry<TKey> *>> binTree;
 
  public:
-  ~IndexedDict() { delete binTree; }
-  IndexedDict(AttributesInfo<TKey, TValue> attributes)
+  IndexedDict(AttributesInfo<TKey, TValue> attributes) : attributes(attributes)
   {
-    this->attributes = attributes;
+    binTree = std::shared_ptr<BinTree<BinTreeDictEntry<TKey> *>>(
+        new BinTree<BinTreeDictEntry<TKey> *>([attributes](const BinTreeDictEntry<TKey> *entry1,
+                                                           const BinTreeDictEntry<TKey> *entry2) {
+          return attributes.Compare(entry1, entry2);
+        }));
   }
 
-  IndexedDict(AttributesInfo<TKey, TValue> attributes, Set<TValue> *set)
+  IndexedDict(AttributesInfo<TKey, TValue> attributes, std::shared_ptr<Set<TValue>> collection)
       : IndexedDict(attributes)
   {
-    set->Traverse([this](TValue value) { this->Add(value); });
+    collection->ForEach([this](TValue value) { this->Add(value); });
   }
 
-  Nullable<TValue> Get(TKey key) override
+  template <class Container>
+  IndexedDict(AttributesInfo<TKey, TValue> attributes, Container container)
+      : IndexedDict(attributes)
   {
-    std::unique_ptr<BinTreeDictEntry<TKey>> foundEntry;
-    if (binTree->Search(_ToKeyTreeEntry(key), foundEntry))
+    for (const TValue &value : container)
     {
-      return dynamic_cast<BinTreeDictEntryOnlyValue<TKey, TValue> *>(
-                 foundEntry.release())
-          ->GetValue();
+      Add(value);
+    }
+  }
+
+  IndexedDict(const IndexedDict &dict) : attributes(dict.attributes)
+  {
+    *this->binTree = *dict.binTree;
+  }
+
+  ~IndexedDict()
+  {
+    binTree->ForEach([](const BinTreeDictEntry<TKey> *entry) { delete entry; });
+  }
+
+  IndexedDict operator=(const IndexedDict &dict)
+  {
+    this->attributes = dict.attributes;
+    *this->attributes = *dict.binTree;
+  }
+
+  int Size() const override { return binTree->GetSize(); }
+
+  Nullable<TValue> Get(TKey key) const override
+  {
+    BinTreeDictEntry<TKey> *foundEntry;
+    auto *entryKey = new BinTreeDictEntryOnlyKey<TKey>(key);
+
+    if (binTree->Search(entryKey, foundEntry))
+    {
+      delete entryKey;
+      return dynamic_cast<BinTreeDictEntryOnlyValue<TKey, TValue> *>(foundEntry)->GetValue();
     }
 
-    return Nullable<TValue>::Null();
+    delete entryKey;
+    return Nullable<TValue>::Null;
   };
 
-  void Remove(TKey key) override { binTree->Remove(_ToKeyTreeEntry(key)); }
+  std::shared_ptr<IndexedDict> GetInRange(const TKey &min, const TKey &max)
+  {
+    auto *entryMin = new BinTreeDictEntryOnlyKey<TKey>(min);
+    auto *entryMax = new BinTreeDictEntryOnlyKey<TKey>(max);
+    std::shared_ptr<BinTree<BinTreeDictEntry<TKey> *>> found =
+        binTree->GetInRange(entryMin, entryMax);
+
+    auto *newDict = new IndexedDict(attributes);
+    found->ForEach([newDict](BinTreeDictEntry<TKey> *const& entry) 
+    {
+
+      TValue value = dynamic_cast<const BinTreeDictEntryOnlyValue<TKey, TValue>*>(entry)->GetValue();
+      newDict->Add(value);
+    });
+
+    return std::shared_ptr<IndexedDict>(newDict);
+  }
+
+  
+  void ForEach(const std::function<void(const TValue &)> &handlerFunc) 
+  {
+    binTree->ForEach([handlerFunc](const BinTreeDictEntry<TKey> *entry) 
+    {
+      TValue value = dynamic_cast<const BinTreeDictEntryOnlyValue<TKey, TValue> *>(entry)->GetValue();
+      handlerFunc(value);
+    });
+  }
+
+  void Remove(TKey key) override
+  {
+    auto *entry = new BinTreeDictEntryOnlyKey<TKey>(key);
+    binTree->Remove(entry);
+    delete entry;
+  }
 
   void Add(TValue value)
   {
-    binTree->Add(std::unique_ptr<BinTreeDictEntry<TKey>>(
-        new BinTreeDictEntryOnlyValue<TKey, TValue>(value,
-                                                    attributes.Compare())));
+    auto *dictEntry = new BinTreeDictEntryOnlyValue<TKey, TValue>(
+        [this](const TValue &value) { return attributes.GetKey(value); }, value);
+
+    binTree->Add(dictEntry);
   }
 };

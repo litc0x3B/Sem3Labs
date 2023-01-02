@@ -1,11 +1,24 @@
 #pragma once
 
 #include <gtest/gtest.h>
+#include "iDictionary.hpp"
 
 #define ARRAY_SIZE(array) sizeof(array) / sizeof(array[0])
 
 const int TEST_ARR[] = {0, 1, 2, 3, 4, 5, 6, 7};
 const int TEST_ARR_SIZE = ARRAY_SIZE(TEST_ARR);
+
+//checks if dictionary has elements for all of these keys and only for these keys
+template <class TKey, class TValue, unsigned long size>
+void doesDictHave(IDictionary<TKey, TValue> *dict, std::array<TKey, size> keys, std::array<TValue, size> values)
+{
+  for (int i = 0; i < keys.size(); i++) 
+  {
+    EXPECT_EQ(dict->Get(keys.at(i)).GetValue(), values.at(i));
+  }
+
+  EXPECT_EQ(dict->Size(), (int)values.size());
+}
 
 template <typename T>
 std::stringstream containerToStream(T &container, int size)

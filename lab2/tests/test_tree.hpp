@@ -4,6 +4,7 @@
 #include "TestHelper.hpp"
 #include "tree.hpp"
 
+// NOLINTBEGIN(misc-definitions-in-headers)
 DynamicArraySequence<int> *TreeNodeToSeq(const TreeNode<int> *node) {
   DynamicArraySequence<int> *seq = new DynamicArraySequence<int>;
   auto *treeChildren = node->GetChildren(); 
@@ -26,3 +27,5 @@ TEST(treeTests, addAndPopNode) {
   containersEqual(*seq, expArr, 3);
   delete seq;
 }
+// NOLINTEND(misc-definitions-in-headers)
+

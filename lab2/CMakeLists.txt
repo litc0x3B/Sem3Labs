@@ -11,6 +11,7 @@ include_directories(include tests ${GTEST_INCLUDE_DIRS})
 add_executable(tests
         src/tests.cpp
         include/iDictionary.hpp
+        include/icollection.hpp
         include/indexing.hpp
         tests/test_indexing.hpp
         tests/test_nullable.hpp
