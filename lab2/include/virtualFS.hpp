@@ -8,10 +8,12 @@ class FSNode;
 class Folder;
 class File;
 
+
 class FSNode {
  private:
   std::string name;
   TreeNode<FSNode*> *treeNode;
+
 
  public:
   FSNode(std::string name);
@@ -22,8 +24,9 @@ class FSNode {
   std::unique_ptr<FSNode> Move();
 
   std::string GetName() const;
-  Folder *ParentFolder();
-  TreeNode<FSNode*> *GetTreeNode();
+  std::string GetPath() const;
+  Folder *ParentFolder() const;
+  TreeNode<FSNode*> *GetTreeNode() const;
 
   void SetName(std::string name);
 };
@@ -45,6 +48,6 @@ class Folder : public FSNode {
   ~Folder();
 
   FSNode *Add(FSNode *fsnode);
-  FSNode *GetNodeByName(std::string name);
+  FSNode *GetNodeByName(std::string name) const;
   std::unique_ptr<DynamicArraySequence<FSNode*>> GetChildren();
 };

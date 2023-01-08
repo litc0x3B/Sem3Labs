@@ -1,7 +1,8 @@
 #pragma once
 
 #include <gtest/gtest.h>
-#include "iDictionary.hpp"
+
+#include "dictionary/iDictionary.hpp"
 
 #define ARRAY_SIZE(array) sizeof(array) / sizeof(array[0])
 

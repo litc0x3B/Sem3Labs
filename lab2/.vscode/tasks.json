@@ -1,0 +1,22 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "valgrind-debug",
+            "target": "${command:cmake.launchTargetPath}",
+            "isBackground": true,
+            "problemMatcher": [
+                "$valgrind-debug"
+            ],
+            "label": "valgrind-debug: valgrind-debug",
+            "valgrind": {"args": ["--leak-check=full"],},
+        }, 
+        {
+            "type": "shell",
+            "label": "kill valgrind",
+            "command" : "pkill --signal 9 -f valgrind.bin"
+        },
+    ]
+}

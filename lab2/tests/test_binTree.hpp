@@ -59,7 +59,7 @@ TEST(BinTreeTest, Search)
     int foundItem;
     EXPECT_TRUE(tree->Search(5, foundItem));
     EXPECT_EQ(5, foundItem);
-    EXPECT_FALSE(tree->Search(11));
+    EXPECT_TRUE(tree->Search(11).IsNull());
 }
 
 TEST(BinTreeTest, Where)

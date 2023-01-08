@@ -1,10 +1,106 @@
 #include <unistd.h>
 
+#include <algorithm>
+#include <climits>
 #include <exception>
 #include <iostream>
+#include <memory>
 #include <string>
 
+#include "colormod.h"
+#include "dictionary/indexing.hpp"
 #include "virtualFS.hpp"
+
+struct Key
+{
+  std::string name = "";
+  std::string path = "";
+};
+
+using DictPtr = std::shared_ptr<IndexedDict<Key, FSNode *>>;
+
+int cmpPaths(const Key &a, const Key &b) { return a.path.compare(b.path); }
+int cmpNames(const Key &a, const Key &b) { return a.name.compare(b.name); }
+
+Key getKey(const FSNode *node)
+{
+  Key key;
+  key.name = node->GetName();
+  key.path = node->GetPath();
+  return key;
+}
+
+FSNode *add(Folder *folder, FSNode *node, DictPtr &dict)
+{
+  folder->Add(node);
+  dict->Add(node);
+  return node;
+}
+
+std::unique_ptr<FSNode> move(FSNode *node, DictPtr &dict)
+{
+  dict->Remove(getKey(node));
+  return std::move(node->Move());
+}
+
+std::string getNameFromPath(const std::string &path) { return path.substr(path.rfind("/") + 1); }
+
+Folder *changeDir(const Folder *curDir, std::string str, const DictPtr &dict)
+{
+  Key key;
+  Nullable<FSNode *> found;
+
+  if (str[str.size() - 1] == '/')
+  {
+    str.pop_back();
+  }
+
+  if (str == "..")
+  {
+    return curDir->ParentFolder();
+  }
+
+  if (str[0] == '/')
+  {
+    key.path = str;
+    key.name = getNameFromPath(str);
+    found = dict->Get(key);
+  }
+  else if (str.find("/") != std::string::npos)
+  {
+    key.path = curDir->GetPath() + "/" + str;
+    key.name = getNameFromPath(str);
+    found = dict->Get(key);
+  }
+  else
+  {
+    return dynamic_cast<Folder *>(curDir->GetNodeByName(str));
+  }
+
+  if (!found.IsNull())
+  {
+    return dynamic_cast<Folder *>(found.GetValue());
+  }
+
+  return nullptr;
+
+}
+
+DictPtr searchByName(const Folder *folder, const DictPtr &dict, std::string name)
+{
+  Key min;
+  Key max;
+
+  char lastChar[2] = {CHAR_MAX, 0};
+
+  min.path = folder->GetPath() + "/";
+  max.path = min.path + std::string(lastChar);
+
+  min.name = name;
+  max.name = name + std::string(lastChar);
+
+  return dict->GetInRange(min, max);
+}
 
 int main()
 {
@@ -12,9 +108,14 @@ int main()
   std::unique_ptr<FSNode> buffer;
   Folder *curDir = root.get();
 
+  AttributesInfo<Key, FSNode *> attrs(
+      {AttributeInfo<Key>("name", cmpNames), AttributeInfo<Key>("path", cmpPaths)}, getKey);
+  auto dict = std::make_shared<IndexedDict<Key, FSNode *>>(attrs);
+  dict->Add(root.get());
+
   while (true)
   {
-    std::cout << ">>> ";
+    std::cout << curDir->GetPath() << ">";
     std::string cmd;
     std::cin >> cmd;
 
@@ -28,11 +129,18 @@ int main()
 
       if (access(path.c_str(), F_OK) == -1)
       {
-        throw std::runtime_error("file \"" + path + "\" cannot be opened");
+        std::cerr << "file \"" + path + "\" cannot be opened" << std::endl;
       }
       else
       {
-        curDir->Add(new File(name, path));
+        try
+        {
+          add(curDir, new File(name, path), dict);
+        }
+        catch (const std::exception &e)
+        {
+          std::cerr << e.what() << std::endl;
+        }
       }
     }
 
@@ -41,7 +149,14 @@ int main()
       auto arr = curDir->GetChildren();
       for (int i = 0; i < arr->GetSize(); i++)
       {
-        std::cout << arr->At(i)->GetName() << " ";
+        Color::Modifier green(Color::Code::FG_GREEN);
+        Color::Modifier defaultColor(Color::Code::FG_DEFAULT);
+
+        if (dynamic_cast<Folder *>(arr->At(i)))
+        {
+          std::cout << green;
+        }
+        std::cout << arr->At(i)->GetName() << " " << defaultColor;
       }
       std::cout << std::endl;
     }
@@ -53,7 +168,7 @@ int main()
 
       try
       {
-        curDir->Add(new Folder(name));
+        add(curDir, new Folder(name), dict);
       }
       catch (const std::exception &e)
       {
@@ -65,19 +180,15 @@ int main()
     {
       std::string name;
       std::cin >> name;
-      Folder *folder = dynamic_cast<Folder *>(curDir->GetNodeByName(name));
+      Folder *folder = changeDir(curDir, name, dict);
 
-      if (name == ".." && curDir->ParentFolder())
-      {
-        curDir = curDir->ParentFolder();
-      }
-      else if (folder)
+      if (folder)
       {
         curDir = folder;
       }
       else
       {
-        std::cout << "\"" << name << "\" - isn't a folder" << std::endl;
+        std::cerr << "\"" << name << "\" - isn't a folder" << std::endl;
       }
     }
 
@@ -85,11 +196,11 @@ int main()
     {
       if (buffer)
       {
-        curDir->Add(buffer.release());
+        add(curDir, buffer.release(), dict);
       }
       else
       {
-        std::cout << "nothing to paste" << std::endl;
+        std::cerr << "nothing to paste" << std::endl;
       }
     }
 
@@ -102,7 +213,7 @@ int main()
       FSNode *fsnode = curDir->GetNodeByName(oldName);
       if (!fsnode)
       {
-        std::cout << "no such file or directory" << std::endl;
+        std::cerr << "no such file or directory" << std::endl;
       }
       else
       {
@@ -125,11 +236,11 @@ int main()
       FSNode *fsnode = curDir->GetNodeByName(name);
       if (!fsnode)
       {
-        std::cout << "no such file or directory" << std::endl;
+        std::cerr << "no such file or directory" << std::endl;
       }
       else
       {
-        buffer = fsnode->Move();
+        buffer = move(fsnode, dict);
       }
     }
 
@@ -144,7 +255,7 @@ int main()
       File *file = dynamic_cast<File *>(curDir->GetNodeByName(fileName));
       if (!file)
       {
-        std::cout << "no such file or directory" << std::endl;
+        std::cerr << "no such file or directory" << std::endl;
         continue;
       }
 
@@ -159,6 +270,17 @@ int main()
       system(extCmd.c_str());
     }
 
+    else if (cmd == "search")
+    {
+      std::string path;
+      std::cin >> path;
+
+      auto results = searchByName(curDir, dict, path);
+      std::cout << "results: " << std::endl;
+      results->ForEach([](const FSNode *node)
+                       { std::cout << "\t" << node->GetPath() << std::endl; });
+    }
+
     else if (cmd == "exit")
     {
       return 0;
@@ -166,7 +288,7 @@ int main()
 
     else
     {
-      std::cout << "unknown command" << std::endl;
+      std::cerr << "unknown command" << std::endl;
     }
   }
 }

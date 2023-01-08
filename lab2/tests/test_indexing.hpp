@@ -1,8 +1,9 @@
+#pragma once
 #include <array>
 #include <memory>
 
 #include "TestHelper.hpp"
-#include "indexing.hpp"
+#include "dictionary/indexing.hpp"
 
 // NOLINTBEGIN(misc-definitions-in-headers)
 namespace TestIndexing
@@ -54,12 +55,12 @@ int compPeopleByName(const Person &a, const Person &b) {
   return compNames(getKey(a), getKey(b));
 }
 
-Person dmitry = {"Dmitry", 19, 165};
+Person dmitry = {"Dmitry", 19, 173};
 Person sasha = {"Sasha", 20, 170};
 Person sasha2 = {"Sasha", 30, 170};
 Person cirno = {"Cirno", 80, 9};  // baka
 
-std::array<Person, 4> people = {dmitry, sasha, cirno, sasha2};
+std::array<Person, 4> people = {sasha, cirno, sasha2, dmitry};
 
 AttributeInfo<PersonKey> age("age", compAges);
 AttributeInfo<PersonKey> name("name", compNames);
@@ -107,7 +108,12 @@ TEST(Indexing, Remove)
   using namespace TestIndexing;
 
   auto dict = generateTestDict();
-  dict.Remove(getKey(sasha));
+  auto removedValue1 = dict.Remove(getKey(sasha));
+  auto removedValue2 = dict.Remove({"amogus", 10});
+
+
+  ASSERT_EQ(removedValue1.GetValue(), sasha);
+  ASSERT_TRUE(removedValue2.IsNull());
 
   std::array<Person, 3> expect = {cirno, dmitry, sasha2};
   doesDictHave(&dict, getKeys(expect), expect);
@@ -127,6 +133,14 @@ TEST(Indexing, FromSet)
   doesDictHave(&dict, getKeys(expect), expect);
 }
 
+TEST(Indexing, Constructor)
+{
+  using namespace TestIndexing;
+  auto dict =  generateTestDict();
+
+  auto dict2(dict);
+}
+
 TEST(Indexing, GetInRange) 
 {
   using namespace TestIndexing;
@@ -138,15 +152,16 @@ TEST(Indexing, GetInRange)
   sonya.name = "Sonya";
   oleg.name = "Oleg";
 
+
   dict.Add(sonya);
   dict.Add(oleg);
 
-  std::array<Person, 3> expect = {dmitry, oleg, sonya};
+  std::array<Person, 3> expect = {oleg, sonya, sasha};
 
-  auto newDict = dict.GetInRange({"", dmitry.age}, {"z", dmitry.age});
+  auto newDict = dict.GetInRange({"O", 19}, {"Sz", 20});
 
   // newDict->ForEach([](const Person &person){std::cout << person.name << " " << person.age << std::endl;});
   doesDictHave(newDict.get(), getKeys(expect), expect);
 }
-// NOLINTEND(misc-definitions-in-headers)
+//NOLINTEND(misc-definitions-in-headers)
 

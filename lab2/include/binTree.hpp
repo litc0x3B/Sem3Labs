@@ -2,7 +2,6 @@
 #include <cstddef>
 #include <cstdlib>
 #include <functional>
-#include <iostream>
 #include <iterator>
 #include <memory>
 #include <random>
@@ -10,6 +9,8 @@
 #include <string>
 
 #include "icollection.hpp"
+#include "nullable.hpp"
+
 
 template <class T>
 using ComparerFunc = std::function<int(const T &, const T &)>;
@@ -433,7 +434,7 @@ class BinTree : public InheritFromICollection<BinTree, T>
     }
   }
 
-  BinTreeNode<T> *_Remove(const T &item, BinTreeNode<T> *curNode)
+  BinTreeNode<T> *_Remove(const T &item, BinTreeNode<T> *curNode, T &removedValue, bool &successfully)
   {
     if (curNode == nullptr)
     {
@@ -444,42 +445,24 @@ class BinTree : public InheritFromICollection<BinTree, T>
 
     if (comp > 0)
     {
-      curNode->rightNode = _Remove(item, curNode->rightNode);
+      curNode->rightNode = _Remove(item, curNode->rightNode, removedValue, successfully);
       _FixSize(curNode);
       return curNode;
     }
     else if (comp < 0)
     {
-      curNode->leftNode = _Remove(item, curNode->leftNode);
+      curNode->leftNode = _Remove(item, curNode->leftNode, removedValue, successfully);
       _FixSize(curNode);
       return curNode;
     }
     else
     {
       BinTreeNode<T> *ret = _Join(curNode->leftNode, curNode->rightNode);
+      successfully = true;
+      removedValue = curNode->value;
       delete curNode;
       return ret;
     }
-  }
-
-  void _GetInRange(const BinTreeNode<T> *curNode, const T &min, const T &max, BinTree<T> *newTree) const
-  {
-    if (curNode == nullptr)
-    {
-      return;
-    }
-
-    if (curNode->leftNode != nullptr && comparer(curNode->leftNode->value, min) > 0) 
-    {
-      _GetInRange(curNode->leftNode, min, max, newTree);
-    }
-
-    if (comparer(curNode->value, min) >= 0 && comparer(curNode->value, max) <= 0)
-    {
-      newTree->Add(curNode->value);
-    }
-
-    _GetInRange(curNode->rightNode, min, max, newTree);
   }
 
   BinTree<T> *_WhereImpl(const std::function<bool(const T& item)> &handlerFunc) const override
@@ -568,9 +551,19 @@ class BinTree : public InheritFromICollection<BinTree, T>
 
   int GetSize() const override { return _GetSize(root); }
 
-  bool Search(const T &item) const override { return _SearchConst(item, &root) != nullptr; }
+  Nullable<T> Search(const T &item) const override
+  {
+    BinTreeNode<T> *const *result = _SearchConst(item, &root);
 
-  bool Search(const T &item, T &foundItem) const override
+    if (result != nullptr)
+    {
+      return (*result)->value;
+    }
+
+    return Nullable<T>::Null;
+  }
+
+  bool Search(const T &item, T &foundItem) const
   {
     BinTreeNode<T> *const *result = _SearchConst(item, &root);
 
@@ -590,6 +583,14 @@ class BinTree : public InheritFromICollection<BinTree, T>
     _TraverseConst(handlerFunc, orderOptions, root);
   }
 
+  void Traverse(const std::function<void(T &)> &handlerFunc,
+                     std::string orderOptions = "LNR") const
+  {
+    _CheckTraverseOptions(orderOptions);
+    HandlerValueArg<T> wrapper(handlerFunc);
+    _Traverse(&wrapper, orderOptions, root);
+  }
+
   void ForEach(const std::function<void(const T& item)> &handlerFunc) const override 
   {
     TraverseConst(handlerFunc, "LNR");
@@ -607,9 +608,19 @@ class BinTree : public InheritFromICollection<BinTree, T>
 
   void Add(const T &item) override { root = _Insert(root, item); }
 
-  void Remove(const T &item) override
+  Nullable<T> Remove(const T &item) override
   {
-    root = _Remove(item, root);
+    bool isSuccessful = false;
+    T removedItem;
+    root = _Remove(item, root, removedItem, isSuccessful);
+    if (isSuccessful)
+    {
+      return removedItem;
+    }
+    else
+    {
+      return Nullable<T>::Null;
+    }
   }
 
   std::shared_ptr<BinTree<T>> Copy() {
@@ -679,11 +690,22 @@ class BinTree : public InheritFromICollection<BinTree, T>
     return std::shared_ptr<BinTree<T>>(newTree);
   }
 
-  std::shared_ptr<BinTree<T>> GetInRange(const T &minValue, const T &maxValue) const {
-    auto newTree = new BinTree<T> (comparer, randomlyBalanced);
-    _GetInRange(root, minValue, maxValue, newTree);
-    return std::shared_ptr<BinTree<T>>(newTree);
+  std::shared_ptr<BinTree<T>> GetInRange(const T &minValue, const T &maxValue, const ComparerFunc<T> &cmp) const {
+    auto newTree = std::make_shared<BinTree<T>>(comparer, IsRandomlyBalanced());
+    ForEach([newTree, &cmp, &minValue, &maxValue](const T &item)
+    {
+      if (cmp(item, minValue) >= 0 && cmp(item, maxValue) <= 0)
+      {
+        newTree->Add(item);
+      }
+    });
+    return newTree;
   }
+
+  std::shared_ptr<BinTree<T>> GetInRange(const T &minValue, const T &maxValue) const {
+    return GetInRange(root, minValue, maxValue, comparer);
+  }
+
 
   bool HasSubtree(const std::shared_ptr<BinTree<T>> tree) const { return _HasSubtree(this->root, tree->root); }
 

@@ -41,11 +41,21 @@ void FSNode::ValidateName(std::string name, Folder *parentFolder)
     throw std::runtime_error("empty file name");
   }
 
-  if (name.find('/') != std::string::npos){
-    throw std::runtime_error("file name cannot contain \"/\" character");
+  if (name.find('/') != std::string::npos || name == ".."){
+    throw std::runtime_error("invalid file name");
   }
-  
 }
+
+std::string FSNode::GetPath() const
+{
+  if (ParentFolder() == nullptr)
+  {
+    return "/" + GetName();
+  }
+
+  return ParentFolder()->GetPath() + "/" + GetName();
+}
+
 
 std::unique_ptr<FSNode> FSNode::Move()
 {
@@ -54,9 +64,9 @@ std::unique_ptr<FSNode> FSNode::Move()
 }
 
 std::string FSNode::GetName() const { return name; }
-TreeNode<FSNode *> *FSNode::GetTreeNode() { return treeNode; }
+TreeNode<FSNode *> *FSNode::GetTreeNode() const { return treeNode; }
 
-Folder *FSNode::ParentFolder()
+Folder *FSNode::ParentFolder() const
 {
   if (treeNode->Parent() != nullptr)
   {
@@ -82,7 +92,7 @@ File::~File(){};
 Folder::Folder(std::string name) : FSNode(name) {}
 Folder::~Folder() {}
 
-FSNode *Folder::GetNodeByName(std::string name)
+FSNode *Folder::GetNodeByName(std::string name) const
 {
   return GetTreeNode()->FindChild([name](FSNode *node) { return node->GetName() == name; });
 }

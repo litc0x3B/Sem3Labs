@@ -46,9 +46,9 @@ class Set : public InheritFromICollection<Set, T>
   int GetSize() const override { return tree->GetSize(); }
 
   void Add(const T &item) override { tree->Add(item); }
-  void Remove(const T &item) override { tree->Remove(item); }
-  bool Search(const T &item) const override { return tree->Search(item); }
-  bool Search(const T &item, T &foundItem) const override { return tree->Search(item, foundItem); }
+  Nullable<T> Remove(const T &item) override { return tree->Remove(item); }
+  Nullable<T> Search(const T &item) const override { return tree->Search(item); }
+  bool Search(const T &item, T &foundItem) const { return tree->Search(item, foundItem); }
 
   T Reduce(const std::function<T(const T &, const T &)> &handlerFunc, T identity) const override
   {
@@ -82,7 +82,7 @@ class Set : public InheritFromICollection<Set, T>
     Set<T> *newSet = new Set<T>(tree->GetComparerFunc());
 
     tree->TraverseConst([&set, newSet](const T &item) {
-      if (set->tree->Search(item))
+      if (!set->tree->Search(item).IsNull())
       {
         newSet->tree->Add(item);
       }
@@ -96,7 +96,7 @@ class Set : public InheritFromICollection<Set, T>
     Set<T> *newSet = new Set<T>(tree->GetComparerFunc());
 
     tree->TraverseConst([&set, newSet](const T &item) {
-      if (!set->tree->Search(item))
+      if (set->tree->Search(item).IsNull())
       {
         newSet->tree->Add(item);
       }
@@ -115,7 +115,7 @@ class Set : public InheritFromICollection<Set, T>
     bool subset = true;
 
     set.tree->TraverseConst([&subset, this](const T &item) {
-      if (!tree->Search(item))
+      if (tree->Search(item).IsNull())
       {
         subset = false;
       }
@@ -138,7 +138,7 @@ class Set : public InheritFromICollection<Set, T>
     bool equal = true;
 
     tree->TraverseConst([&equal, &set](const T &item) {
-      if (!set.tree->Search(item))
+      if (set.tree->Search(item).IsNull())
       {
         equal = false;
       }

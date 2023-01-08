@@ -1,6 +1,5 @@
 #pragma once
 #include <stdexcept>
-#include <iostream>
 
 template <class T>
 class Node

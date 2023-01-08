@@ -5,11 +5,62 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "by-gdb",
+            "name": "Launch Debugger with valgrind",
+            "type": "cppdbg",
             "request": "launch",
-            "name": "Launch(gdb)",
             "program": "${command:cmake.launchTargetPath}",
-            "cwd": "${command:cmake.launchTargetDirectory}"
-        }
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${command:cmake.launchTargetDirectory}",
+            "MIMode": "gdb",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              },
+              {
+                "description": "Connect to valgrind",
+                "text": "target remote | vgdb",
+                "ignoreFailures": true,
+              },
+            ],
+
+            "preLaunchTask": "valgrind-debug: valgrind-debug",
+        },
+
+        {
+          "name": "Launch Debugger",
+          "type": "cppdbg",
+          "request": "launch",
+          "program": "${command:cmake.launchTargetPath}",
+          "args": [],
+          "environment": [{"name": "GTEST_BREAK_ON_FAILURE", "value": "1"},
+                          {"name": "GTEST_CATCH_EXCEPTIONS", "value": "0"}],
+          "stopAtEntry": false,
+          "cwd": "${command:cmake.launchTargetDirectory}",
+          "MIMode": "gdb",
+          "setupCommands": [
+            {
+              "description": "Enable pretty-printing for gdb",
+              "text": "-enable-pretty-printing",
+              "ignoreFailures": true
+            },
+          ],
+      },
+
+
+      //   {
+      //     "name": "Launch Debugger with valgrind (by-gdb)",
+      //     "type": "by-gdb",
+      //     "request": "launch",
+      //     "program": "${command:cmake.launchTargetPath}",
+      //     "stopAtEntry": false,
+      //     "cwd": "${command:cmake.launchTargetDirectory}",
+      //     "preLaunchTask": "valgrind-debug: valgrind-debug",
+      //     "commandsBeforeExec": ["target remote | vgdb"]
+          
+      // }
+
     ]
 }

@@ -85,6 +85,7 @@ template<typename T>
 DynamicArraySequence<T> *DynamicArraySequence<T>::Copy(const Sequence<T> *seq)
 {
     delete this->storage;
+    this->elementsCount = 0;
 
     this->storage = new DynamicArray<T>(0);
 
@@ -123,7 +124,7 @@ int DynamicArraySequence<T>::GetActualSize() const
 template <typename T>
 void DynamicArraySequence<T>::Append(T item)
 {
-    if (this->elementsCount == 0)
+    if (this->storage->GetSize() == 0)
     {
         this->storage->Resize(1);
     }

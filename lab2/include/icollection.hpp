@@ -2,15 +2,16 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include "nullable.hpp"
 
-template<class T> class ICollection
+template<class T> 
+class ICollection
 {
 public:
     virtual int GetSize() const = 0;
     virtual void Add(const T &item) = 0;
-    virtual void Remove(const T &item) = 0;
-    virtual bool Search(const T &item) const = 0;
-    virtual bool Search(const T &item, T &foundItem) const = 0;
+    virtual Nullable<T> Remove(const T &item) = 0;
+    virtual Nullable<T> Search(const T &item) const = 0;
 
     virtual T Reduce(const std::function<T(const T&, const T&)> &handlerFunc, T identity) const = 0;
     virtual void ForEach(const std::function<void(const T& item)> &handlerFunc) const = 0;
@@ -29,18 +30,18 @@ public:
         return std::shared_ptr<ICollection<T>>(_WhereImpl(handlerFunc));
     }
 
+private:
+    virtual ICollection<T> *_MapImpl(const std::function<T(const T& item)> &handlerFunc) const = 0;
+    virtual ICollection<T> *_WhereImpl(const std::function<bool(const T& item)> &handlerFunc) const = 0;
     template <class collection>
     static void AssertICollection() 
     {
         static_assert(std::is_base_of<ICollection<T>, collection>::value, "type parameter must derive from ICollection");
     }
-
-private:
-    virtual ICollection<T> *_MapImpl(const std::function<T(const T& item)> &handlerFunc) const = 0;
-    virtual ICollection<T> *_WhereImpl(const std::function<bool(const T& item)> &handlerFunc) const = 0;
 };
 
-template<template <class> class Derived, class T> class InheritFromICollection : public ICollection<T>
+template<template <class> class Derived, class T>
+class InheritFromICollection : public ICollection<T>
 {
 public:
     std::shared_ptr<Derived<T>> Map(const std::function<T(const T& item)> &handlerFunc) const 
