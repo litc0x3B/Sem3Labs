@@ -27,7 +27,7 @@ add_executable(tests
         include/linkedList.hpp
         include/sequence/linkedListSequence.hpp
         include/sequence/sequence.hpp
-        include/sequence/dynamicArraySequence.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp include/dictionary/binTreeDictEntry.hpp tests/test_dictonary.hpp)
+        include/sequence/dynamicArraySequence.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp include/dictionary/binTreeDictEntry.hpp tests/test_dictonary.hpp tests/test_sparseVector.hpp)
 
 
 add_executable(virtualFS

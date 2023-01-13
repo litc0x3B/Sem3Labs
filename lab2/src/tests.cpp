@@ -5,6 +5,7 @@
 #include "test_set.hpp"
 #include "test_indexing.hpp"
 #include "test_dictonary.hpp"
+#include "test_sparseVector.hpp"
 
 
 

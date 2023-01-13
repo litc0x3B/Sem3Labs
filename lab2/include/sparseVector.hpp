@@ -17,18 +17,33 @@ class SparseVector
   std::shared_ptr<Dict> dict;
 
  public:
-  SparseVector() { dict = std::make_shared<Dict>(_Compare); }
+  SparseVector() {
+    static_assert(dimension > 0, "dimension value cannot be negative");
+    dict = std::make_shared<Dict>(_Compare);
+  }
 
-  SparseVector(Sequence<T> *seq) : SparseVector()
+  explicit SparseVector(Sequence<T> *seq) : SparseVector()
   {
-    if (seq->GetSize() > dimension)
+    if (seq->GetSize() != dimension)
     {
-      throw std::runtime_error("Sequence size is larger than SparseVector dimension");
+      throw std::runtime_error("Sequence size isn't equal to vector dimension");
     }
 
     for (int i = 0; i < seq->GetSize(); i++)
     {
       T num = seq->Get(i);
+      if (!(num == T()))
+      {
+        dict->Add(i, num);
+      }
+    }
+  }
+
+  explicit SparseVector(const T(&arr)[dimension]) : SparseVector()
+  {
+    for (int i = 0; i < dimension; i++)
+    {
+      T num = arr[i];
       if (!(num == T()))
       {
         dict->Add(i, num);
@@ -45,10 +60,7 @@ class SparseVector
       throw std::out_of_range("index is out of range");
     }
 
-    if (!dict->Get(ind).IsNull())
-    {
-      dict->Remove(ind);
-    }
+    dict->Remove(ind);
 
     if (!(value == T()))
     {
@@ -56,7 +68,7 @@ class SparseVector
     }
   }
 
-  T Get(int ind)
+  T Get(int ind) const
   {
     if (ind < 0 || ind >= dimension)
     {
@@ -72,23 +84,54 @@ class SparseVector
     return T();
   }
 
-  SparseVector &operator+(const SparseVector &vec)
+  int Dimension()
   {
-    vec.dict->ForEach([this](int ind, const T &value) { this->Set(ind, this->Get(ind) + value); });
-    return *this;
+    return dimension;
   }
 
-  SparseVector &operator-(const SparseVector &vec)
+  SparseVector operator+(const SparseVector &vec) const
   {
-    vec.dict->ForEach([this](int ind, const T &value) { this->Set(ind, this->Get(ind) - value); });
-    return *this;
+    SparseVector newVec = *this;
+    vec.dict->ForEach([&newVec](int ind, const T &value) { newVec.Set(ind, newVec.Get(ind) + value); });
+    return newVec;
   }
 
-  T operator*(const SparseVector &vec)
+  SparseVector operator-(const SparseVector &vec) const
   {
-    T retValue;
-    vec.dict->ForEach([this, retValue](int ind, const T &value)
+    SparseVector newVec = *this;
+    vec.dict->ForEach([&newVec](int ind, const T &value) { newVec.Set(ind, newVec.Get(ind) - value); });
+    return newVec;
+  }
+
+  T operator*(const SparseVector &vec) const
+  {
+    T retValue = T();
+    vec.dict->ForEach([this, &retValue](int ind, const T &value)
                       { retValue = retValue + this->Get(ind) * value; });
-    return *this;
+    return retValue;
+  }
+
+  bool operator==(const SparseVector &vec) const
+  {
+    if (this->dict->Size() != vec.dict->Size())
+    {
+      return false;
+    }
+
+    bool flag = true;
+    this->dict->ForEach([&vec, &flag](int ind, const T &value)
+                        {
+                          Nullable<T> found = vec.dict->Get(ind);
+                          if (found.IsNull() || found.GetValue() != value)
+                          {
+                            flag = false;
+                          }
+                        });
+    return flag;
+  }
+
+  bool operator!=(const SparseVector &vec) const
+  {
+    return !(*this == vec);
   }
 };
