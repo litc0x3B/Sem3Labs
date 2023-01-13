@@ -91,7 +91,7 @@ TEST(BinTreeTest, Reduce)
 TEST(BinTreeTest, Remove)
 {
     auto tree = getTestTree();
-    tree->Remove(3);
+    EXPECT_EQ(tree->Remove(3).GetValue(), 3);
 
     EXPECT_EQ
     (

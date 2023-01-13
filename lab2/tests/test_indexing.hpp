@@ -14,7 +14,10 @@ struct Person
   int age;
   int height;
 
-  bool operator==(const Person &person) const { return this->name == person.name; }
+  bool operator==(const Person &person) const
+  {
+    return this->name == person.name;
+  }
 };
 
 struct PersonKey
@@ -51,7 +54,8 @@ int compAges(const PersonKey &key1, const PersonKey &key2)
   return 0;
 }
 
-int compPeopleByName(const Person &a, const Person &b) {
+int compPeopleByName(const Person &a, const Person &b)
+{
   return compNames(getKey(a), getKey(b));
 }
 
@@ -88,7 +92,7 @@ std::array<PersonKey, size> getKeys(std::array<Person, size> people)
 TEST(Indexing, Add)
 {
   using namespace TestIndexing;
-  
+
   auto dict = generateTestDict();
   doesDictHave(&dict, getKeys(people), people);
 }
@@ -110,7 +114,6 @@ TEST(Indexing, Remove)
   auto dict = generateTestDict();
   auto removedValue1 = dict.Remove(getKey(sasha));
   auto removedValue2 = dict.Remove({"amogus", 10});
-
 
   ASSERT_EQ(removedValue1.GetValue(), sasha);
   ASSERT_TRUE(removedValue2.IsNull());
@@ -136,12 +139,12 @@ TEST(Indexing, FromSet)
 TEST(Indexing, Constructor)
 {
   using namespace TestIndexing;
-  auto dict =  generateTestDict();
+  auto dict = generateTestDict();
 
   auto dict2(dict);
 }
 
-TEST(Indexing, GetInRange) 
+TEST(Indexing, GetInRange)
 {
   using namespace TestIndexing;
 
@@ -152,7 +155,6 @@ TEST(Indexing, GetInRange)
   sonya.name = "Sonya";
   oleg.name = "Oleg";
 
-
   dict.Add(sonya);
   dict.Add(oleg);
 
@@ -160,8 +162,8 @@ TEST(Indexing, GetInRange)
 
   auto newDict = dict.GetInRange({"O", 19}, {"Sz", 20});
 
-  // newDict->ForEach([](const Person &person){std::cout << person.name << " " << person.age << std::endl;});
+  // newDict->ForEach([](const Person &person){std::cout <<
+  // person.name << " " << person.age << std::endl;});
   doesDictHave(newDict.get(), getKeys(expect), expect);
 }
-//NOLINTEND(misc-definitions-in-headers)
-
+// NOLINTEND(misc-definitions-in-headers)

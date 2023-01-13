@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.0)
 
 project(lab2)
 
+# set(CMAKE_CXX_COMPILER "gfilt")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Locate GTest
 find_package(GTest REQUIRED)

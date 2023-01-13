@@ -11,7 +11,7 @@ struct DictEntry
 };
 
 template <class TKey, class TValue>
-class Dictionary : IDictionary<TKey, TValue>
+class Dictionary : public IDictionary<TKey, TValue>
 {
  private:
   using DictTree = BinTree<std::shared_ptr<BinTreeDictEntry<TKey>>>;
@@ -19,7 +19,7 @@ class Dictionary : IDictionary<TKey, TValue>
   using Entry = BinTreeDictEntryKeyAndValue<TKey, TValue>;
   using EntryKey = BinTreeDictEntryOnlyKey<TKey>;
 
-  Dictionary *_CopyImpl() const override {return new Dictionary(*this);} ;
+  Dictionary *_CopyImpl() const override { return new Dictionary(*this); };
   const CompKeysFunc<TKey> cmp;
   std::shared_ptr<DictTree> binTree;
 
@@ -27,7 +27,8 @@ class Dictionary : IDictionary<TKey, TValue>
   Dictionary(const CompKeysFunc<TKey> &cmp) : cmp(cmp)
   {
     binTree = std::make_shared<DictTree>(
-        [cmp](const std::shared_ptr<EntryBase> &entry1, const std::shared_ptr<EntryBase> &entry2)
+        [cmp](const std::shared_ptr<EntryBase> &entry1,
+              const std::shared_ptr<EntryBase> &entry2)
         { return cmp(entry1->GetKey(), entry2->GetKey()); });
   }
 
@@ -46,7 +47,10 @@ class Dictionary : IDictionary<TKey, TValue>
     this->binTree = dict.binTree->Copy();
   }
 
-  std::shared_ptr<Dictionary> Copy() const { return std::shared_ptr<Dictionary>(_CopyImpl()); }
+  std::shared_ptr<Dictionary> Copy() const
+  {
+    return std::shared_ptr<Dictionary>(_CopyImpl());
+  }
 
   Nullable<TValue> Get(TKey key) const override
   {
@@ -70,13 +74,14 @@ class Dictionary : IDictionary<TKey, TValue>
         });
   }
 
-  void ForEach(std::function<void(const TKey &key, const TValue &value)> &func) const
+  void ForEach(
+      const std::function<void(const TKey &key, const TValue &value)> &func) const
   {
     binTree->ForEach(
         [func](const std::shared_ptr<EntryBase> &entryBase)
         {
-          Entry entry = std::dynamic_pointer_cast<Entry>(entryBase);
-          func(entry.GetKey(), entry.GetValue());
+          auto entry = std::dynamic_pointer_cast<Entry>(entryBase);
+          func(entry->GetKey(), entry->GetValue());
         });
   }
 
@@ -92,7 +97,8 @@ class Dictionary : IDictionary<TKey, TValue>
     auto removedEntry = binTree->Remove(entry);
     if (!removedEntry.IsNull())
     {
-      return std::dynamic_pointer_cast<Entry>(removedEntry.GetValue())->GetValue();
+      return std::dynamic_pointer_cast<Entry>(removedEntry.GetValue())
+          ->GetValue();
     }
 
     else

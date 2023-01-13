@@ -240,10 +240,14 @@ class IndexedDict : public IDictionary<TKey, TValue>
         DynamicArraySequence<AttributeInfo<TKey>> *attrsArr = attributes.GetAttributes();
 
         int ret = attrsArr->At(i).CompareKeys(key1, key2);
+        delete attrsArr;
         return ret;
       });
       //  debugFunc<TKey, TValue>(newTree);
     }
+
+    delete entryMin;
+    delete entryMax;
 
     return std::shared_ptr<IndexedDict>(new IndexedDict(attributes, newTree));
   }
