@@ -4,4 +4,4 @@ AlignAfterOpenBracket: Align
 BinPackParameters: true
 AlwaysBreakTemplateDeclarations: Yes
 AllowAllParametersOfDeclarationOnNextLine: true
-ColumnLimit: 80
+ColumnLimit: 100

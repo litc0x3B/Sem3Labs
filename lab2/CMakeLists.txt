@@ -9,7 +9,7 @@ find_package(GTest REQUIRED)
 
 include_directories(include tests ${GTEST_INCLUDE_DIRS})
 
-#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fsanitize=memory -fPIE -pie -fno-omit-frame-pointer -fsanitize-memory-track-origins")
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fsanitize=address -fPIE -fno-omit-frame-pointer -fsanitize-memory-track-origins")
 
 add_executable(tests
         src/tests.cpp
@@ -29,7 +29,14 @@ add_executable(tests
         include/linkedList.hpp
         include/sequence/linkedListSequence.hpp
         include/sequence/sequence.hpp
-        include/sequence/dynamicArraySequence.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp include/dictionary/binTreeDictEntry.hpp tests/test_dictonary.cpp tests/test_sparseVector.cpp tests/sequence/dynamicArraySequenceTest.cpp tests/sequence/linkedListSequenceTest.cpp)
+        include/sequence/dynamicArraySequence.hpp
+        include/sparseVector.hpp
+        include/dictionary/dictionary.hpp
+        include/dictionary/binTreeDictEntry.hpp
+        tests/test_dictonary.cpp
+        tests/test_sparseVector.cpp
+        tests/sequence/dynamicArraySequenceTest.cpp
+        tests/sequence/linkedListSequenceTest.cpp)
 
 
 add_executable(virtualFS
