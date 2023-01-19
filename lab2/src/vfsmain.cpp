@@ -109,7 +109,7 @@ int main()
   Folder *curDir = root.get();
 
   AttributesInfo<Key, FSNode *> attrs(
-      {AttributeInfo<Key>("name", cmpNames), AttributeInfo<Key>("path", cmpPaths)}, getKey);
+      {AttributeInfo<Key>("testName", cmpNames), AttributeInfo<Key>("path", cmpPaths)}, getKey);
   auto dict = std::make_shared<IndexedDict<Key, FSNode *>>(attrs);
   dict->Add(root.get());
 

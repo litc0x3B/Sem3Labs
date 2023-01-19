@@ -1,4 +1,3 @@
-#pragma once
 #include <array>
 #include <string>
 
@@ -35,20 +34,23 @@ TEST(Dictionary, Constuctor)
   doesDictHave(dict.get(), expectKeys, expectValues);
 }
 
-TEST(Dictionary, RemoveAndCopy)
+TEST(Dictionary, CopyAndRemove)
 {
   using namespace TestDictionary;
-  auto dict = generateDict();
+  auto dict1 = generateDict();
+  auto dict2 = dict1->Copy();
 
-  std::array<std::string, 4> expectKeys = {"one", "two", "three", "four"};
-  std::array<int, 4> expectValues = {1, 2, 3, 4};
-  EXPECT_EQ(dict->Remove("five").GetValue(), 5);
-  EXPECT_TRUE(dict->Remove("six").IsNull());
+  EXPECT_EQ(dict1->Remove("five").GetValue(), 5);
+  EXPECT_TRUE(dict1->Remove("six").IsNull());
 
-  doesDictHave(dict.get(), expectKeys, expectValues);
+  std::array<std::string, 4> expectKeys1 = {"one", "two", "three", "four"};
+  std::array<int, 4> expectValues1 = {1, 2, 3, 4};
 
-  auto dict2 = dict->Copy();
-  doesDictHave(dict.get(), expectKeys, expectValues);
+  std::array<std::string, 5> expectKeys2 = {"one", "two", "three", "four", "five"};
+  std::array<int, 5> expectValues2 = {1, 2, 3, 4, 5};
+
+  doesDictHave(dict1.get(), expectKeys1, expectValues1);
+  doesDictHave(dict2.get(), expectKeys2, expectValues2);
 }
 
 TEST(Dictionary, ForEach)

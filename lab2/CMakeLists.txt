@@ -9,16 +9,18 @@ find_package(GTest REQUIRED)
 
 include_directories(include tests ${GTEST_INCLUDE_DIRS})
 
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -fsanitize=memory -fPIE -pie -fno-omit-frame-pointer -fsanitize-memory-track-origins")
+
 add_executable(tests
         src/tests.cpp
         include/dictionary/iDictionary.hpp
         include/icollection.hpp
         include/dictionary/indexing.hpp
-        tests/test_indexing.hpp
-        tests/test_nullable.hpp
-        tests/test_binTree.hpp
-        tests/test_tree.hpp
-        tests/test_set.hpp
+        tests/test_indexing.cpp
+        tests/test_nullable.cpp
+        tests/test_binTree.cpp
+        tests/test_tree.cpp
+        tests/test_set.cpp
         tests/TestHelper.hpp
         include/nullable.hpp
         include/virtualFS.hpp
@@ -27,7 +29,7 @@ add_executable(tests
         include/linkedList.hpp
         include/sequence/linkedListSequence.hpp
         include/sequence/sequence.hpp
-        include/sequence/dynamicArraySequence.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp include/dictionary/binTreeDictEntry.hpp tests/test_dictonary.hpp tests/test_sparseVector.hpp)
+        include/sequence/dynamicArraySequence.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp include/dictionary/binTreeDictEntry.hpp tests/test_dictonary.cpp tests/test_sparseVector.cpp tests/sequence/dynamicArraySequenceTest.cpp tests/sequence/linkedListSequenceTest.cpp)
 
 
 add_executable(virtualFS
@@ -42,7 +44,8 @@ add_executable(virtualFS
         include/sequence/sequence.hpp
         include/sequence/dynamicArraySequence.hpp)
 
-add_executable(TestSpeed
+add_executable(speedTest
+        include/speedTest.hpp
         src/virtualFS.cpp
         include/dictionary/indexing.hpp
         include/virtualFS.hpp
@@ -51,15 +54,13 @@ add_executable(TestSpeed
         include/linkedList.hpp
         include/sequence/linkedListSequence.hpp
         include/sequence/sequence.hpp
-        include/sequence/dynamicArraySequence.hpp include/testSpeed.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp)
-
-
+        include/sequence/dynamicArraySequence.hpp include/speedTest.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp src/speedTestMain.cpp)
 
 target_link_libraries(tests ${GTEST_LIBRARIES} pthread)
 target_compile_features(tests PRIVATE cxx_std_17)
 install(TARGETS tests RUNTIME DESTINATION bin)
 
-# SET(CMAKE_CXX_FLAGS_DEBUG "-O0")
+ SET(CMAKE_CXX_FLAGS_DEBUG "-O3")
 # SET(CMAKE_C_FLAGS_DEBUG "-O0")
 
 install(TARGETS tests RUNTIME DESTINATION bin)

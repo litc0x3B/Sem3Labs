@@ -53,6 +53,12 @@ class SparseVector
 
   SparseVector(const SparseVector &vec) : SparseVector() { this->dict = vec.dict->Copy(); }
 
+  SparseVector &operator=(const SparseVector &vec)
+  {
+    this->dict = vec.dict->Copy();
+    return *this;
+  }
+
   void Set(int ind, const T &value)
   {
     if (ind < 0 || ind >= dimension)

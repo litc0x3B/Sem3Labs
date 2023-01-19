@@ -1,10 +1,8 @@
-#pragma once
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
 #include "set.hpp"
 
-// NOLINTBEGIN(misc-definitions-in-headers)
 
 int ConvertToInt(const std::string& str)
 {
@@ -79,4 +77,3 @@ TEST(SetTest, IsEqual)
     EXPECT_FALSE(set1->IsEqualTo(set3));
     EXPECT_FALSE(set1->IsEqualTo(set4));
 }
-// NOLINTEND(misc-definitions-in-headers)

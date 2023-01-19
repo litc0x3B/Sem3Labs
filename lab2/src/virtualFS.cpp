@@ -32,17 +32,17 @@ void FSNode::ValidateName(std::string name, Folder *parentFolder)
   {
     if (parentFolder->GetNodeByName(name) != NULL)
     {
-      throw std::runtime_error("two files with the same name in the folder");
+      throw std::runtime_error("two files with the same testName in the folder");
     }
   }
 
   if (name == "")
   {
-    throw std::runtime_error("empty file name");
+    throw std::runtime_error("empty file testName");
   }
 
   if (name.find('/') != std::string::npos || name == ".."){
-    throw std::runtime_error("invalid file name");
+    throw std::runtime_error("invalid file testName");
   }
 }
 
@@ -111,11 +111,11 @@ FSNode *Folder::Add(FSNode *fsnode)
 std::unique_ptr<DynamicArraySequence<FSNode *>> Folder::GetChildren()
 {
   int size = GetTreeNode()->Children()->GetSize();
-  auto arr = new DynamicArraySequence<FSNode *>(size);
+  auto arr = new DynamicArraySequence<FSNode *>();
 
   for (int i = 0; i < size; i++)
   {
-    arr->At(i) = GetTreeNode()->Children()->At(i)->Value();
+    arr->Append(GetTreeNode()->Children()->At(i)->Value());
   }
 
   return std::move(std::unique_ptr<DynamicArraySequence<FSNode *>>(arr));

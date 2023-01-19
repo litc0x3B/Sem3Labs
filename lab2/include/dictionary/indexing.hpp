@@ -127,7 +127,7 @@ class AttributesInfo
 // {
 //   binTree->ForEach([](const BinTreeDictEntry<TKey> *entry) {
 //     TValue value = dynamic_cast<const BinTreeDictEntryOnlyValue<TKey, TValue> *>(entry)->GetValue();
-//     std::cout << value.name << " " << value.age << " " << entry << std::endl;
+//     std::cout << value.testName << " " << value.age << " " << entry << std::endl;
 //   });
 //   std::cout << "***********************************" << std::endl;
 // }

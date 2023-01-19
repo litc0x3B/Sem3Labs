@@ -1,6 +1,3 @@
-#pragma once
-
-#include <functional>
 #include <gtest/gtest.h>
 #include <memory>
 #include <string>
@@ -16,7 +13,6 @@
 //                            12
 //
 
-// NOLINTBEGIN(misc-definitions-in-headers)
 std::shared_ptr<BinTree<int>> getTestTreeNotBalanced()
 {
     std::shared_ptr<BinTree<int>> tree = std::make_shared<BinTree<int>>();
@@ -121,5 +117,4 @@ TEST(BinTreeTest, HasSubtree)
     subtree->Remove(11);
     EXPECT_FALSE(tree->HasSubtree(subtree));
 }
-// NOLINTEND(misc-definitions-in-headers)
 

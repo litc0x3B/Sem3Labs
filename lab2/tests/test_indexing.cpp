@@ -1,11 +1,9 @@
-#pragma once
 #include <array>
 #include <memory>
 
 #include "TestHelper.hpp"
 #include "dictionary/indexing.hpp"
 
-// NOLINTBEGIN(misc-definitions-in-headers)
 namespace TestIndexing
 {
 struct Person
@@ -67,7 +65,7 @@ Person cirno = {"Cirno", 80, 9};  // baka
 std::array<Person, 4> people = {sasha, cirno, sasha2, dmitry};
 
 AttributeInfo<PersonKey> age("age", compAges);
-AttributeInfo<PersonKey> name("name", compNames);
+AttributeInfo<PersonKey> name("testName", compNames);
 AttributesInfo<PersonKey, Person> attrs({age, name}, getKey);
 
 IndexedDict<PersonKey, Person> generateTestDict()
@@ -163,7 +161,6 @@ TEST(Indexing, GetInRange)
   auto newDict = dict.GetInRange({"O", 19}, {"Sz", 20});
 
   // newDict->ForEach([](const Person &person){std::cout <<
-  // person.name << " " << person.age << std::endl;});
+  // person.testName << " " << person.age << std::endl;});
   doesDictHave(newDict.get(), getKeys(expect), expect);
 }
-// NOLINTEND(misc-definitions-in-headers)

@@ -59,7 +59,7 @@ T Nullable<T>::GetValue() const
 {
   if (isNull)
   {
-    throw std::runtime_error("attemp of getting access to a null value");
+    throw std::runtime_error("attempt to get access to a null value");
   }
   else
   {

@@ -1,4 +1,3 @@
-#pragma once
 #include "TestHelper.hpp"
 #include "sparseVector.hpp"
 
@@ -50,4 +49,15 @@ TEST(SparseVector, SumDiffAndMult)
   ASSERT_EQ(a + b, SparseVector({1, 1, 2}));
   ASSERT_EQ(a - b, SparseVector({1, 1, 0}));
   ASSERT_EQ(a * b, 1);
+}
+
+TEST(SparseVector, Copy)
+{
+  SparseVector a({1, 1, 1});
+
+  SparseVector b = a;
+  SparseVector c(a);
+
+  ASSERT_EQ(a, b);
+  ASSERT_EQ(a, c);
 }

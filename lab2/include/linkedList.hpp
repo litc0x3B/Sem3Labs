@@ -5,11 +5,10 @@ template <class T>
 class Node
 {
 public:
-    Node(Node<T> *prev, T value, Node<T> *next)
+    Node(Node<T> *prev, T value, Node<T> *next) : value(value)
     {
         this->prev = prev;
         this->next = next;
-        this->value = value;
     }
 
     Node<T> *next = nullptr;
