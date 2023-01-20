@@ -37,10 +37,14 @@ class Set : public InheritFromICollection<Set, T>
 
   Set(const Set<T> &set) {tree = set.tree->Copy();}
 
-  Set(const BinTree<T> &tree) {tree = tree->Copy();}
+  explicit Set(const BinTree<T> &tree) {tree = tree->Copy();}
 
 
-  Set<T> operator=(const Set<T> &set) { tree = set.tree->Copy();}
+  Set<T> &operator=(const Set<T> &set)
+  {
+    tree = set.tree->Copy();
+    return *this;
+  }
 
   ComparerFunc<T> GetComparerFunc() const { return tree->GetComparerFunc(); }
   int GetSize() const override { return tree->GetSize(); }

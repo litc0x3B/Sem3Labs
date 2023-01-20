@@ -25,10 +25,11 @@ class Dictionary : public IDictionary<TKey, TValue>
   std::shared_ptr<DictTree> binTree;
 
  public:
-  explicit Dictionary(const CompKeysFunc<TKey> &cmp) : cmp(cmp)
+  explicit Dictionary(const CompKeysFunc<TKey> &cmp = defaultCompFunc<TKey>) : cmp(cmp)
   {
     binTree = std::make_shared<DictTree>([cmp](const EntryBase *entry1, const EntryBase *entry2)
                                          { return cmp(entry1->GetKey(), entry2->GetKey()); });
+
   }
 
   Dictionary(const CompKeysFunc<TKey> &cmp,
@@ -40,6 +41,8 @@ class Dictionary : public IDictionary<TKey, TValue>
       this->Add(entry.key, entry.value);
     }
   }
+
+  Dictionary(const std::initializer_list<DictEntry<TKey, TValue>> &list) : Dictionary(defaultCompFunc<TKey>, list) {}
 
   Dictionary(const Dictionary &dict) : Dictionary(dict.GetComparerFunc())
   {

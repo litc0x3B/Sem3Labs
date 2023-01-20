@@ -24,7 +24,7 @@ struct Person
    }
 };
 
-struct `~PersonKey
+struct PersonKey
 {
   std::string name;
   int age;

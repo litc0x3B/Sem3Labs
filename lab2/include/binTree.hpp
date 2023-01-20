@@ -584,7 +584,7 @@ class BinTree : public InheritFromICollection<BinTree, T>
   }
 
   void Traverse(const std::function<void(T &)> &handlerFunc,
-                     std::string orderOptions = "LNR") const
+                     std::string orderOptions = "LNR")
   {
     _CheckTraverseOptions(orderOptions);
     HandlerValueArg<T> wrapper(handlerFunc);

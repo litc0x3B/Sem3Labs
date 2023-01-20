@@ -13,9 +13,6 @@
 #include "binTreeDictEntry.hpp"
 
 
-
-
-
 template <class TKey>
 class AttributeInfo
 {

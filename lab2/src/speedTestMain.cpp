@@ -35,7 +35,7 @@ SparseVec Generator(int nonZeroValues)
 
 void Sum(std::vector<SparseVec> &sparseVecs) { sparseVecs[0] + sparseVecs[1]; }
 
-void Mult(std::vector<SparseVec> &sparseVecs) { sparseVecs[0] + sparseVecs[1]; }
+void Mult(std::vector<SparseVec> &sparseVecs) { sparseVecs[0] * sparseVecs[1]; }
 
 SpeedTest::Results Test(SpeedTest::Settings settings)
 {
@@ -74,7 +74,7 @@ std::string names[] = {
     "Принц",      "Алимп",       "Алихан",    "Вильдан",    "Довуд",      "Стратон",
     "Робин",      "Умут"};
 
-TestIndexing::Person cirno = {"Сырник", 90, 9};
+TestIndexing::Person target = {"Сырник", 90, 9};
 
 using Dict = IndexedDict<TestIndexing::PersonKey, TestIndexing::Person>;
 
@@ -84,13 +84,13 @@ std::shared_ptr<Dict> Generator(int size)
   std::uniform_int_distribution<> nameIds(0, sizeof(names) / sizeof(std::string) - 1);
   std::uniform_int_distribution<> heights(150, 190);
   std::uniform_int_distribution<> ages(1, size);
-  std::uniform_int_distribution<> cirnoProb(1, size);
-  bool isCirnoAdded = false;
+  std::uniform_int_distribution<> targetProb(1, size);
+  bool isTargetAdded = false;
 
   for (int i = 0; i < size - 1; i++)
   {
     TestIndexing::Person person;
-    if (isCirnoAdded || cirnoProb(rng) != 9)
+    if (isTargetAdded || targetProb(rng) != 9/*не срабатывает с верооятностью (1 / size)*/)
     {
       person.name = names[nameIds(rng)];
       person.age = ages(rng);
@@ -98,18 +98,18 @@ std::shared_ptr<Dict> Generator(int size)
     }
     else
     {
-      person = cirno;
-      isCirnoAdded = true;
-      std::cout << "Добавил сырника при i = " << i << std::endl;
+      person = target;
+      isTargetAdded = true;
+      std::cout << "Добавил target при i = " << i << std::endl;
     }
 
     dict->Add(person);
     //    std::cout << person << std::endl;
   }
 
-  if (!isCirnoAdded)
+  if (!isTargetAdded)
   {
-    dict->Add(cirno);
+    dict->Add(target);
   }
   std::cout << dict->Size() << std::endl;
   return dict;
@@ -117,10 +117,10 @@ std::shared_ptr<Dict> Generator(int size)
 
 void Get(std::vector<std::shared_ptr<Dict>> &dictVec)
 {
-  auto found = dictVec[0]->Get(TestIndexing::getKey(cirno));
+  auto found = dictVec[0]->Get({"Сырник", 90});
   if (!found.IsNull())
   {
-    std::cout << "Нашёл Сырника: " << found.GetValue() << std::endl;
+    std::cout << "Нашёл target: " << found.GetValue() << std::endl;
   }
 }
 
@@ -136,7 +136,7 @@ SpeedTest::Results Test(SpeedTest::Settings settings)
   using namespace SpeedTest;
 
   TestSubjectInfo<std::shared_ptr<Dict>> subjInfo(Generator, 1);
-  CasesVec<std::shared_ptr<Dict>> casesInfo = {{"Get", Get}, {"GetInRange", GetInRange}};
+  CasesVec<std::shared_ptr<Dict>> casesInfo = {{"Get", Get}, /*{"GetInRange", GetInRange}*/};
 
   SpeedTester<std::shared_ptr<Dict>> tester(settings, subjInfo, casesInfo);
 

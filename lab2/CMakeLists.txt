@@ -36,7 +36,7 @@ add_executable(tests
         tests/test_dictonary.cpp
         tests/test_sparseVector.cpp
         tests/sequence/dynamicArraySequenceTest.cpp
-        tests/sequence/linkedListSequenceTest.cpp include/TestIndexing.hpp)
+        tests/sequence/linkedListSequenceTest.cpp include/TestIndexing.hpp include/graph.hpp)
 
 
 add_executable(virtualFS
@@ -61,7 +61,7 @@ add_executable(speedTest
         include/linkedList.hpp
         include/sequence/linkedListSequence.hpp
         include/sequence/sequence.hpp
-        include/sequence/dynamicArraySequence.hpp include/speedTest.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp src/speedTestMain.cpp include/TestIndexing.hpp)
+        include/sequence/dynamicArraySequence.hpp include/speedTest.hpp include/sparseVector.hpp include/dictionary/dictionary.hpp src/speedTestMain.cpp include/TestIndexing.hpp  include/graph.hpp)
 
 target_link_libraries(tests ${GTEST_LIBRARIES} pthread)
 target_compile_features(tests PRIVATE cxx_std_17)
