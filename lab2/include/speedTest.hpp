@@ -12,7 +12,7 @@ struct Settings
   unsigned maxSize;
   unsigned iterationCount;
 
-  unsigned CalcStep() const { return (maxSize - minSize) / iterationCount; }
+  unsigned CalcStep() const { return (maxSize - minSize + 1) / iterationCount; }
 };
 
 using namespace std::chrono;
@@ -26,7 +26,7 @@ struct Case
 
 struct IterationResult
 {
-  milliseconds elapsedTime;
+  microseconds elapsedTime;
 //  TestSubject retValue;
 };
 
@@ -184,6 +184,7 @@ class SpeedTester
     unsigned step = settings.CalcStep();
     std::vector<CaseResult> casesResults;
 
+
     for (int i = 0; i < cases.size(); i++)
     {
       casesResults.push_back(CaseResult(cases[i].caseName));
@@ -191,6 +192,7 @@ class SpeedTester
 
     for (unsigned size = settings.minSize; size < settings.maxSize; size += step)
     {
+      std::cout << "Size: " << size << "/" << settings.maxSize << std::endl;
       std::vector<TestSubject> subjects = GenerateSubjects(size);
 
       for (int i = 0; i < cases.size(); i++)
@@ -198,11 +200,12 @@ class SpeedTester
         std::vector<TestSubject> subjectsClones = CopySubjects(subjects);
         IterationResult iterationResult;
 
+
         auto begin = steady_clock::now();
         cases[i].func(subjectsClones);
         auto end = steady_clock::now();
 
-        iterationResult.elapsedTime = duration_cast<milliseconds>(end - begin);
+        iterationResult.elapsedTime = duration_cast<microseconds>(end - begin);
 
         casesResults.at(i).iterations.push_back(iterationResult);
         DeleteSubjects(subjectsClones);

@@ -270,6 +270,18 @@ int main()
       system(extCmd.c_str());
     }
 
+    else if (cmd == "help")
+    {
+      std::cout << "\tcd <folder name or path>" << std::endl;
+      std::cout << "\tcut <file name>" << std::endl;
+      std::cout << "\tpaste" << std::endl;
+      std::cout << "\trename <old name> <new name>" << std::endl;
+      std::cout << "\texec <file name> <shell command> (file path will be inserted instead of \'%\')" << std::endl;
+      std::cout << "\tsearch <file name>" << std::endl;
+      std::cout << "\tmkdir <dir name>" << std::endl;
+      std::cout << "\texit" << std::endl;
+    }
+
     else if (cmd == "search")
     {
       std::string path;
