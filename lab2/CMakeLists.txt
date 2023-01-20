@@ -67,7 +67,7 @@ target_link_libraries(tests ${GTEST_LIBRARIES} pthread)
 target_compile_features(tests PRIVATE cxx_std_17)
 install(TARGETS tests RUNTIME DESTINATION bin)
 
- SET(CMAKE_CXX_FLAGS_DEBUG "-O3")
+ SET(CMAKE_CXX_FLAGS_DEBUG "-O2")
 # SET(CMAKE_C_FLAGS_DEBUG "-O0")
 
 install(TARGETS tests RUNTIME DESTINATION bin)

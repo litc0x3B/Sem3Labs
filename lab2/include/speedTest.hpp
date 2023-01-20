@@ -21,88 +21,86 @@ template <class TestSubject>
 struct Case
 {
   std::string caseName;
-  std::function<TestSubject(const std::vector<TestSubject> &)> func;
+  std::function<void(std::vector<TestSubject> &)> func;
 };
 
-template <class TestSubject>
 struct IterationResult
 {
   milliseconds elapsedTime;
-  TestSubject retValue;
+//  TestSubject retValue;
 };
 
-template <class TestSubject>
 struct CaseResult
 {
   std::string caseName;
-  std::vector<IterationResult<TestSubject>> iterations;
+  std::vector<IterationResult> iterations;
 
   explicit CaseResult(std::string caseName) : caseName(caseName) {}
 };
 
-template <class TestSubject>
 struct Results
 {
+
  private:
-  void OutputHeader(std::ostream &os)
+  void OutputHeader(std::ostream &os) const
   {
-    if (casesResults.size() == 0) return;
+    if (casesResults.empty()) return;
 
     os << "Size";
     for (const auto &caseResults : casesResults)
     {
       os << ", " << caseResults.caseName;
     }
-    os << std::endl;
   }
 
  public:
-  std::vector<CaseResult<TestSubject>> casesResults;
+  std::vector<CaseResult> casesResults;
   Settings settings;
 
-  void OutputElapsedTime(std::ostream &os)
+  friend std::ostream &operator<<(std::ostream &os, const Results &results)
   {
-    OutputHeader(os);
+    results.OutputHeader(os);
 
-    unsigned size = settings.minSize;
-    unsigned step = settings.CalcStep();
-    unsigned iterationCount = casesResults.at(0).iterations.size();
+    unsigned size = results.settings.minSize;
+    unsigned step = results.settings.CalcStep();
+    unsigned iterationCount = results.casesResults.at(0).iterations.size();
 
     for (unsigned i = 0; i < iterationCount; i++)
     {
-      os << size;
+      os << std::endl << size;
 
-      for (const CaseResult<TestSubject> &casesResult : casesResults)
+      for (const CaseResult &casesResult : results.casesResults)
       {
         os << ", " << casesResult.iterations.at(i).elapsedTime.count();
       }
-      os << std::endl;
 
       size += step;
     }
+
+    return os;
   }
 
-  void OutputRetValues(std::ostream &os)
-  {
-    OutputHeader(os);
-
-    unsigned size = settings.minSize;
-    unsigned step = settings.CalcStep();
-    unsigned iterationCount = casesResults.at(0).iterations.size();
-
-    for (unsigned i = 0; i < iterationCount; i++)
-    {
-      os << size;
-
-      for (const CaseResult<TestSubject> &casesResult : casesResults)
-      {
-        os << ", " << casesResult.iterations.at(i).retValue;
-      }
-      os << std::endl;
-
-      size += step;
-    }
-  }
+//  void OutputRetValues(std::ostream &os)
+//  {
+//    OutputHeader(os);
+//
+//    unsigned size = settings.minSize;
+//    unsigned step = settings.CalcStep();
+//    unsigned iterationCount = casesResults.at(0).iterations.size();
+//
+//    for (unsigned i = 0; i < iterationCount; i++)
+//    {
+//      os << size;
+//
+//      for (const CaseResult<TestSubject> &casesResult : casesResults)
+//      {
+//        os << ", " << casesResult.iterations.at(i).retValue;
+//      }
+//      os << std::endl;
+//
+//      size += step;
+//    }
+//  }
 };
 
 template <class TestSubject>
@@ -181,29 +179,27 @@ class SpeedTester
   {
   }
 
-  Results<TestSubject> PerformTests()
+  Results PerformTests()
   {
     unsigned step = settings.CalcStep();
-    std::vector<CaseResult<TestSubject>> casesResults;
+    std::vector<CaseResult> casesResults;
 
     for (int i = 0; i < cases.size(); i++)
     {
-      casesResults.push_back(CaseResult<TestSubject>(cases[i].caseName));
+      casesResults.push_back(CaseResult(cases[i].caseName));
     }
 
     for (unsigned size = settings.minSize; size < settings.maxSize; size += step)
     {
       std::vector<TestSubject> subjects = GenerateSubjects(size);
 
-
       for (int i = 0; i < cases.size(); i++)
       {
-                std::vector<TestSubject> subjectsClones = CopySubjects(subjects);
-//        std::vector<TestSubject> subjectsClones = subjects;
-        IterationResult<TestSubject> iterationResult;
+        std::vector<TestSubject> subjectsClones = CopySubjects(subjects);
+        IterationResult iterationResult;
 
         auto begin = steady_clock::now();
-        iterationResult.retValue = cases[i].func(subjectsClones);
+        cases[i].func(subjectsClones);
         auto end = steady_clock::now();
 
         iterationResult.elapsedTime = duration_cast<milliseconds>(end - begin);
@@ -215,7 +211,7 @@ class SpeedTester
       DeleteSubjects(subjects);
     }
 
-    Results<TestSubject> ret = {casesResults, settings};
+    Results ret = {casesResults, settings};
     return ret;
   }
 
