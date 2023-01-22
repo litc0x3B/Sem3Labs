@@ -14,7 +14,7 @@ class Nullable
   Nullable(T value);  // NOLINT
   Nullable &operator=(const T &value);
   bool IsNull() const;
-  T GetValue() const;
+  const T &GetValue() const;
   const static Nullable<T> Null;
 
   template <class TNew>
@@ -55,7 +55,7 @@ bool Nullable<T>::IsNull() const
 }
 
 template <class T>
-T Nullable<T>::GetValue() const
+const T &Nullable<T>::GetValue() const
 {
   if (isNull)
   {
@@ -66,6 +66,7 @@ T Nullable<T>::GetValue() const
     return value;
   }
 }
+
 
 template <class T>
 template <class TNew>

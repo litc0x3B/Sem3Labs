@@ -97,10 +97,16 @@ class Dictionary : public IDictionary<TKey, TValue>
         });
   }
 
-  void Add(const TKey &key, const TValue &value)
+  bool Add(const TKey &key, const TValue &value)
   {
     auto *entry = new Entry(key, value);
-    binTree->Add(entry);
+    if (binTree->Add(entry))
+    {
+      return true;
+    }
+
+    delete entry;
+    return false;
   }
 
   Nullable<TValue> Remove(TKey key) override

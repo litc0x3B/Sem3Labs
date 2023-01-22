@@ -52,6 +52,7 @@ class BinTreeDictEntryKeyAndValue : public BinTreeDictEntry<TKey>
  public:
   BinTreeDictEntryKeyAndValue(TKey key, TValue value) : key(key), value(value) {}
   TValue GetValue() const {return value;}
+  TValue &GetValueNonConst()  {return value;}
   TKey GetKey() const override {return key;}
 };
 

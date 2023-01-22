@@ -34,6 +34,21 @@ TEST(Dictionary, Constuctor)
   doesDictHave(dict.get(), expectKeys, expectValues);
 }
 
+TEST(Dictionary, Add)
+{
+  using namespace TestDictionary;
+  auto dict = generateDict();
+
+  ASSERT_TRUE(dict->Add("six", 6));
+  ASSERT_FALSE(dict->Add("six", 7));
+
+
+  std::array<std::string, 6> expectKeys = {"one", "two", "three", "four", "five", "six"};
+  std::array<int, 6> expectValues = {1, 2, 3, 4, 5, 6};
+
+  doesDictHave(dict.get(), expectKeys, expectValues);
+}
+
 TEST(Dictionary, CopyAndRemove)
 {
   using namespace TestDictionary;

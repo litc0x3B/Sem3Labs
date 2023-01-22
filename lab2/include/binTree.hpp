@@ -219,10 +219,11 @@ class BinTree : public InheritFromICollection<BinTree, T>
     }
   }
 
-  BinTreeNode<T> *_InsertRoot(BinTreeNode<T> *node, const T &value)
+  BinTreeNode<T> *_InsertRoot(BinTreeNode<T> *node, const T &value, bool &isSuccessfulOut)
   {
     if (node == nullptr)
     {
+      isSuccessfulOut = true;
       return new BinTreeNode<T>(value);
     }
 
@@ -230,13 +231,13 @@ class BinTree : public InheritFromICollection<BinTree, T>
 
     if (comp > 0)
     {
-      node->rightNode = _InsertRoot(node->rightNode, value);
+      node->rightNode = _InsertRoot(node->rightNode, value, isSuccessfulOut);
       _FixSize(node);
       return _RotateLeft(node);
     }
     else if (comp < 0)
     {
-      node->leftNode = _InsertRoot(node->leftNode, value);
+      node->leftNode = _InsertRoot(node->leftNode, value, isSuccessfulOut);
       _FixSize(node);
       return _RotateRight(node);
     }
@@ -246,27 +247,28 @@ class BinTree : public InheritFromICollection<BinTree, T>
     }
   }
 
-  BinTreeNode<T> *_Insert(BinTreeNode<T> *node, const T &value)
+  BinTreeNode<T> *_Insert(BinTreeNode<T> *node, const T &value, bool &isSuccessfulOut)
   {
     if (node == nullptr)
     {
+      isSuccessfulOut = true;
       return new BinTreeNode<T>(value);
     }
 
     if (randomlyBalanced && std::rand() % (_GetSize(node) + 1) == 0)
     {
-      return _InsertRoot(node, value);
+      return _InsertRoot(node, value, isSuccessfulOut);
     }
 
     int comp = comparer(value, node->value);
 
     if (comp > 0)
     {
-      node->rightNode = _Insert(node->rightNode, value);
+      node->rightNode = _Insert(node->rightNode, value, isSuccessfulOut);
     }
     else if (comp < 0)
     {
-      node->leftNode = _Insert(node->leftNode, value);
+      node->leftNode = _Insert(node->leftNode, value, isSuccessfulOut);
     }
 
     _FixSize(node);
@@ -606,7 +608,12 @@ class BinTree : public InheritFromICollection<BinTree, T>
     return prevValue;
   }
 
-  void Add(const T &item) override { root = _Insert(root, item); }
+  bool Add(const T &item) override
+  {
+    bool isSuccessfull = false;
+    root = _Insert(root, item, isSuccessfull);
+    return isSuccessfull;
+  }
 
   Nullable<T> Remove(const T &item) override
   {

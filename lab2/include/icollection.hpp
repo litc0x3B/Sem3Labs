@@ -9,7 +9,7 @@ class ICollection
 {
 public:
     virtual int GetSize() const = 0;
-    virtual void Add(const T &item) = 0;
+    virtual bool Add(const T &item) = 0;
     virtual Nullable<T> Remove(const T &item) = 0;
     virtual Nullable<T> Search(const T &item) const = 0;
 

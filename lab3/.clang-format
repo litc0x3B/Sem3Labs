@@ -1,0 +1,7 @@
+BasedOnStyle: Google
+BreakBeforeBraces: Allman
+AlignAfterOpenBracket: Align
+BinPackParameters: true
+AlwaysBreakTemplateDeclarations: Yes
+AllowAllParametersOfDeclarationOnNextLine: true
+ColumnLimit: 100

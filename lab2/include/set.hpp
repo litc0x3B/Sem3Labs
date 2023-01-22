@@ -49,7 +49,7 @@ class Set : public InheritFromICollection<Set, T>
   ComparerFunc<T> GetComparerFunc() const { return tree->GetComparerFunc(); }
   int GetSize() const override { return tree->GetSize(); }
 
-  void Add(const T &item) override { tree->Add(item); }
+  bool Add(const T &item) override { return tree->Add(item); }
   Nullable<T> Remove(const T &item) override { return tree->Remove(item); }
   Nullable<T> Search(const T &item) const override { return tree->Search(item); }
   bool Search(const T &item, T &foundItem) const { return tree->Search(item, foundItem); }

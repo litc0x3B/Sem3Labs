@@ -275,6 +275,7 @@ class IndexedDict : public IDictionary<TKey, TValue>
     return Nullable<TValue>::Null;
   }
 
+  //TODO: Fix leak and change return value
   void Add(TValue value)
   {
     auto *dictEntry =

@@ -36,7 +36,7 @@ add_executable(tests
         tests/test_dictonary.cpp
         tests/test_sparseVector.cpp
         tests/sequence/dynamicArraySequenceTest.cpp
-        tests/sequence/linkedListSequenceTest.cpp include/TestIndexing.hpp include/graph.hpp)
+        tests/sequence/linkedListSequenceTest.cpp include/TestIndexing.hpp include/graph.hpp tests/test_graph.cpp)
 
 
 add_executable(virtualFS
